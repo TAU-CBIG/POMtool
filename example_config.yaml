@@ -1,24 +1,44 @@
+# describe how model should be run
 model:
+- id: "my_matlab_model"
   exec: "matlab -run 'main_hiPSC_CM_CE.m'"
-  parameter: "INa_g_max=%1, If_g_max*%2"
-  par: "--simulation_length=800"
-  par: "--stimulated=true"
+  cwd: "/home/mr0661/random/tmp"
+- par: "\"INa_g_max=%1, If_g_max*%2\""
+- par: "--simulation_length=800"
+- par: "--stimulated=true"
+- id: "my_matlab_model2"
+  exec: "matlab -run 'main_hiPSC_CM_CE.m'"
+  cwd: "/home/mr0661/random/tmp"
+- par: "--simulation_length=800"
+- par: "--stimulated=true"
+
+# how model should be run and with what parameters
 experiment:
+- name: "mylatin_%" # '%' is to be replaced with id-number
+  id: "mylatin"
+  model: "my_matlab_model"
   parametrization: "latin_hybercube"
-  number of cells: 10000
+  cells: 100
   parametrization_length: 9
+  manifest: "simulation_manifest.yaml"
+
+# list biomarkers that should be calculated
 biomarkers:
-  id: "all_biomarkerss"
+- id: "all_biomarkerss" # Id for this set of biomarkers
   window: "end-10s:end"
-  - biomarker: "MDP"
-  - biomarker: "APD90"
-  - biomarker: "APD60"
+  target: "mylatin"
+- biomarker: "MDP"
+- biomarker: "APD90"
+- biomarker: "APD60"
+
+# Contains list of calibrations that should be run
 calibration:
-  protocol: "nonan"
+# calibration condition, basic check, checks if nan or inf
+- protocol: "nonan"
   if_fail: "discarded_because_of_nans"
   if_success: "continue"
-calibration:
-  protocol: "biomarker_range"
+# calibration condition, check against biomarkers
+- protocol: "biomarker_range"
   biomarked_id: "all_biomarkerss"
   input_data_path: "/some/path/to/data.csv"
   if_fail: "discarded"
