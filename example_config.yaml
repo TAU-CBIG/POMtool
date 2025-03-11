@@ -1,0 +1,25 @@
+model:
+  exec: "matlab -run 'main_hiPSC_CM_CE.m'"
+  parameter: "INa_g_max=%1, If_g_max*%2"
+  par: "--simulation_length=800"
+  par: "--stimulated=true"
+experiment:
+  parametrization: "latin_hybercube"
+  number of cells: 10000
+  parametrization_length: 9
+biomarkers:
+  id: "all_biomarkerss"
+  window: "end-10s:end"
+  - biomarker: "MDP"
+  - biomarker: "APD90"
+  - biomarker: "APD60"
+calibration:
+  protocol: "nonan"
+  if_fail: "discarded_because_of_nans"
+  if_success: "continue"
+calibration:
+  protocol: "biomarker_range"
+  biomarked_id: "all_biomarkerss"
+  input_data_path: "/some/path/to/data.csv"
+  if_fail: "discarded"
+  if_success: "selected"
