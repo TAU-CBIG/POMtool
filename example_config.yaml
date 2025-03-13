@@ -2,25 +2,24 @@
 model:
 - id: "my_matlab_model"
   exec: "matlab -run 'main_hiPSC_CM_CE.m'"
-  cwd: "/home/mr0661/random/tmp"
   param_key: "%#"
 - par: "\"INa_g_max=%1, If_g_max*%2\""
 - par: "--simulation_length=800"
 - par: "--stimulated=true"
 - id: "my_matlab_model2"
   exec: "matlab -run 'main_hiPSC_CM_CE.m'"
-  cwd: "/home/mr0661/random/tmp"
 - par: "--simulation_length=800"
 - par: "--stimulated=true"
 
 # how model should be run and with what parameters
 experiment:
-- name: "mylatin_%" # '%' is to be replaced with id-number
+- name: "mylatin_#" # '#' is to be replaced with id-number
   id: "mylatin"
+  cwd: "/home/mr0661/random/tmp"
   model: "my_matlab_model"
   parametrization: "latin_hybercube"
   cells: 100
-  parametrization_length: 9
+  parameter_count: 2
   manifest: "simulation_manifest.yaml"
 
 # list biomarkers that should be calculated
