@@ -18,9 +18,9 @@ experiment:
   cwd: "/home/mr0661/random/tmp"
   model: "my_matlab_model"
   parametrization: "latin_hybercube"
-  cells: 100
+  cells: 2
   parameter_count: 2
-  manifest: "simulation_manifest.yaml"
+  manifest: "simulation_manifest.csv"
 
 # list biomarkers that should be calculated
 biomarkers:

@@ -107,11 +107,20 @@ class Experiment:
         # generate all parameters
         parameters = self._generate_parameters()
 
+        manifest = ''
         # run for each parameter
         for idx in range(0, self.cells):
             directory = self._get_directory(idx)
             full_path = self.cwd + "/" + directory
             models.dry(self.model, full_path, parameters[idx,:])
+
+            manifest_line = [directory]
+            for par in parameters[idx,:]:
+                manifest_line.append(str(par))
+            manifest += (', '.join(manifest_line)) + ";\n"
+
+        print(f'manifest: {self.manifest}:')
+        print(manifest)
 
 
 class BiomarkerSet:
