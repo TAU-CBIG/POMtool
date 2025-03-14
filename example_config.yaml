@@ -27,6 +27,7 @@ biomarkers:
 - id: "all_biomarkerss" # Id for this set of biomarkers
   window: "end-10s:end"
   target: "mylatin"
+  file: "biomarkers.csv"
 - biomarker: "MDP"
 - biomarker: "APD90"
 - biomarker: "APD60"

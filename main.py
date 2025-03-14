@@ -28,7 +28,7 @@ class Model:
             raise ValueError('exec not defined')
 
     def __str__(self) -> str:
-        return f"{self.exec} {' '.join(self.pars)}" 
+        return f"{self.exec} {' '.join(self.pars)}"
 
     def _create_command(self, parameters) -> str:
         command = f'{self.exec} {" ".join(self.pars)}'
@@ -43,7 +43,6 @@ class Model:
             idx += 1
         return command
 
-
     def dry(self, cwd, parameters) -> None:
         command = self._create_command(parameters)
         print(f'dry run in {cwd} of\n    {command}')
@@ -53,6 +52,10 @@ class Model:
         # TODO: create directory for running
         # TODO: actually run the thing
         print(f'dry run in {cwd} of\n    {command}')
+
+    def get_data(self, directory: str, names: list) -> np.ndarray:
+        # TODO get the described with names from directory
+        return  np.ndarray([])
 
 
 class Models:
@@ -74,15 +77,15 @@ class Models:
             ret_val.append(f'{id}: {model}')
         return '\n'.join(ret_val)
 
-    def dry(self, id, cwd, parameters) -> None:
-        self.models[id].dry(cwd, parameters)
+    def model(self, id: str) -> Model:
+        return self.models[id]
 
 
 class Experiment:
     def __init__(self, args) -> None:
         self.name = args['name']
         self.id = args['id']
-        self.model = args['model']
+        self.model_id = args['model']
         self.cwd = args['cwd']
         self.parametrization = args['parametrization']
         self.cells = args['cells']
@@ -101,59 +104,107 @@ class Experiment:
             sampler = sstats.qmc.LatinHypercube(d=self.parameter_count, seed=0)
             return sampler.random(n=self.cells)
         else:
-            raise ValueError(f'parametrization "{self.parametrization}" not recognized')
+            raise ValueError(f'parametrization method "{self.parametrization}" not recognized')
 
-    def dry(self, models) -> None:
-        # generate all parameters
-        parameters = self._generate_parameters()
-
+    def _generate_manifest(self, parameters: np.ndarray) -> str:
         manifest = ''
         # run for each parameter
         for idx in range(0, self.cells):
             directory = self._get_directory(idx)
-            full_path = self.cwd + "/" + directory
-            models.dry(self.model, full_path, parameters[idx,:])
-
             manifest_line = [directory]
             for par in parameters[idx,:]:
                 manifest_line.append(str(par))
             manifest += (', '.join(manifest_line)) + ";\n"
+        return manifest
+
+    def dry(self, models: Models) -> None:
+        self.model: Model = models.model(self.model_id)
+        # generate all parameters
+        parameters = self._generate_parameters()
+        manifest = self._generate_manifest(parameters)
+
+        for idx in range(0, self.cells):
+            directory = self._get_directory(idx)
+            full_path = self.cwd + "/" + directory
+            self.model.dry(full_path, parameters[idx,:])
 
         print(f'manifest: {self.manifest}:')
         print(manifest)
 
+    def get_data(self, names: list, idx: int) -> np.ndarray:
+        return self.model.get_data(self._get_directory(idx), names)
 
-class BiomarkerSet:
-    def __init__(self, args) -> None:
-        self.id = args[0]['id']
-        self.window = args[0]['window']
-        self.target = args[0]['target']
-        self.biomarkers = []
-        for i in range(1,len(args)):
-            self.biomarkers.append(args[i]['biomarker'])
+TIME = 'time'
+VM = 'Vm'
+CALSIUM = 'Ca'
 
-    def __str__(self) -> str:
-        return f'{self.id} | {self.window} | {self.target} | {",".join(self.biomarkers)}'
+class MDP:
+    def __init__(self) -> None:
+        pass
+
+    def required_data(self) -> list:
+        return [TIME, VM]
+
+class APD90:
+    def __init__(self) -> None:
+        pass
+
+    def required_data(self) -> list:
+        return [TIME, VM]
+
+class APD60:
+    def __init__(self) -> None:
+        pass
+
+    def required_data(self) -> list:
+        return [TIME, VM]
 
 
 class Biomarkers:
     def __init__(self, args) -> None:
-        self.biomarkers = {}
-        location = 0
-        while location < len(args):
-            tmp_args = [args[location]]
-            id = args[location]['id']
-            location += 1
-            while location < len(args) and 'biomarker' in args[location]:
-                tmp_args.append(args[location])
-                location += 1
-            self.biomarkers[id] = BiomarkerSet(tmp_args)
+        self.id = args[0]['id']
+        self.window = args[0]['window']
+        self.target = args[0]['target']
+        self.file = args[0]['file']
+        self.biomarkers = []
+        for i in range(1,len(args)):
+            bio = args[i]['biomarker']
+            if bio == "MDP":
+                self.biomarkers.append(MDP())
+            elif bio == "APD90":
+                self.biomarkers.append(APD90())
+            elif bio == "APD60":
+                self.biomarkers.append(APD60())
+            else:
+                raise ValueError(f'Unrecognized biomarker `{bio}`')
 
     def __str__(self) -> str:
-        ret_val = []
-        for id, biomarker_set in self.biomarkers.items():
-            ret_val.append(f'{id}: {biomarker_set}')
-        return '\n'.join(ret_val)
+        bio_str = ' , '.join(map(str, list(map(type, self.biomarkers))))
+        return f'id: {self.id} | win: {self.window} | target: {self.target} | file: {self.file}| {bio_str}'
+
+    def _required_data_full(self) -> list:
+        required_data = []
+        for bm in self.biomarkers:
+            for data_name in bm.required_data():
+                if data_name not in required_data:
+                    required_data.append(data_name)
+        return required_data
+
+
+    def dry(self, experiment: Experiment) -> None:
+        print("Find biomarkers for the following:")
+        for bm in self.biomarkers:
+            print(str(type(bm)))
+        print(f'Data is accessed with following types: `{"`, `".join(self._required_data_full())}`')
+        print(f'Using experiment: `{experiment}`')
+
+    def run(self, experiment: Experiment) -> None:
+        # Collect list of all needed data from biomarkers
+        names = self._required_data_full()
+        # get data through the experiment needed for the biomarkers
+        for idx in range(0, experiment.cells):
+            # get data through the experiment needed for the biomarkers
+            experiment.get_data(names, idx)
 
 
 class Calibration:
@@ -183,23 +234,16 @@ def run():
     experiment = Experiment(content['experiment'][0])
     biomarkers = Biomarkers(content['biomarkers'])
     calibration = Calibration(content['calibration'])
-    print('\n--models--')
-    print(models)
-    print('\n--experiment--')
-    print(experiment)
-    print('\n--biomarkers--')
-    print(biomarkers)
-    print('\n--calibration--')
-    print(calibration)
-
     print('\n--script-running--')
 
     # Run all experiments
     experiment.dry(models)
 
     # Calculate biomarkers for each `target` instance
+    biomarkers.dry(experiment)
 
-    # Go through each 
+    # Go through each calibration condition
+    print(calibration)
 
 
 if __name__ == '__main__':
