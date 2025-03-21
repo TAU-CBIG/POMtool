@@ -1,13 +1,12 @@
 # describe how model should be run
 model:
 - id: "my_matlab_model"
-  exec: "matlab -run 'main_hiPSC_CM_CE.m'"
+  exec: "echo"
   param_key: "%#"
+  base_directory: "/home/mr0661/projects/population_of_models/_model" # Directory that is copied for each 
+- par: "matlab"
+- par: "-run main_hiPSC_CM_CE.m"
 - par: "\"INa_g_max=%1, If_g_max*%2\""
-- par: "--simulation_length=800"
-- par: "--stimulated=true"
-- id: "my_matlab_model2"
-  exec: "matlab -run 'main_hiPSC_CM_CE.m'"
 - par: "--simulation_length=800"
 - par: "--stimulated=true"
 
@@ -15,7 +14,7 @@ model:
 experiment:
 - name: "mylatin_#" # '#' is to be replaced with id-number
   id: "mylatin"
-  cwd: "/home/mr0661/random/tmp"
+  cwd: "/home/mr0661/projects/population_of_models/_example"
   model: "my_matlab_model"
   parametrization: "latin_hybercube"
   cells: 2

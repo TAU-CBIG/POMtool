@@ -4,11 +4,14 @@ import argparse
 import yaml
 import scipy.stats as sstats
 import numpy as np
+import os
+import subprocess
+import shutil
 
 class Model:
     def __init__(self, full_args) -> None:
-        print(full_args)
         self.exec = None
+        self.base_directory = None
         self.param_key = ''
         self.pars = []
         for args in full_args:
@@ -22,6 +25,10 @@ class Model:
                 self.param_key = args['param_key']
             if 'par' in args:
                 self.pars.append(args['par'])
+            if 'base_directory' in args:
+                if self.base_directory != None:
+                    raise ValueError('Multiple model base directories defined.')
+                self.base_directory = args['base_directory']
         if self.param_key == '':
             self.param_key = '%#%'
         if self.exec == None:
@@ -30,28 +37,31 @@ class Model:
     def __str__(self) -> str:
         return f"{self.exec} {' '.join(self.pars)}"
 
-    def _create_command(self, parameters) -> str:
-        command = f'{self.exec} {" ".join(self.pars)}'
+    def _create_command(self, parameters) -> list:
         # Replace parameters
-        idx = 1
-        for param in parameters:
-            to_replace = self.param_key.replace('#', str(idx))
-            if command.count(to_replace) == 0:
-                print(f'Warning: Argument "{to_replace}" not found.')
-            else:
-                command = command.replace(to_replace, str(param))
-            idx += 1
-        return command
+        full_command = [self.exec]
+
+        for command_par in self.pars:
+            new_command_par = command_par
+            idx = 1
+            for param in parameters:
+                to_replace = self.param_key.replace('#', str(idx))
+                new_command_par = new_command_par.replace(to_replace, str(param))
+                idx += 1
+            full_command.append(new_command_par)
+        return full_command
 
     def dry(self, cwd, parameters) -> None:
         command = self._create_command(parameters)
-        print(f'dry run in {cwd} of\n    {command}')
+        print(f'dry run in {cwd} of\n    {" ".join(command)}')
 
-    def run(self, cwd, parameters) -> None:
+    def run(self, current_wd, parameters) -> None:
         command = self._create_command(parameters)
-        # TODO: create directory for running
-        # TODO: actually run the thing
-        print(f'dry run in {cwd} of\n    {command}')
+        os.makedirs(current_wd, exist_ok=True)
+        if self.base_directory != None:
+            shutil.copytree(self.base_directory, current_wd)
+        stdout_file = open(f'{current_wd}/stdout.txt', 'w')
+        subprocess.call(command, cwd=current_wd, stdout=stdout_file)
 
     def get_data(self, directory: str, names: list) -> np.ndarray:
         # TODO get the described with names from directory
@@ -90,7 +100,7 @@ class Experiment:
         self.parametrization = args['parametrization']
         self.cells = args['cells']
         self.parameter_count = args['parameter_count']
-        self.manifest = args['manifest']
+        self.manifest_file_name = args['manifest']
 
     def __str__(self) -> str:
         return self.id
@@ -118,6 +128,15 @@ class Experiment:
         return manifest
 
     def dry(self, models: Models) -> None:
+        print(f"Manifest {self.cwd + '/' + self.manifest_file_name}: ")
+        print(self._internal_run(models, Model.dry))
+
+    def run(self, models: Models) -> None:
+        manifest = self._internal_run(models, Model.run)
+        with open(self.cwd + '/' + self.manifest_file_name, 'w') as f:
+            f.write(manifest)
+
+    def _internal_run(self, models: Models, method) -> str:
         self.model: Model = models.model(self.model_id)
         # generate all parameters
         parameters = self._generate_parameters()
@@ -126,10 +145,9 @@ class Experiment:
         for idx in range(0, self.cells):
             directory = self._get_directory(idx)
             full_path = self.cwd + "/" + directory
-            self.model.dry(full_path, parameters[idx,:])
+            method(self.model, full_path, parameters[idx,:])
+        return manifest
 
-        print(f'manifest: {self.manifest}:')
-        print(manifest)
 
     def get_data(self, names: list, idx: int) -> np.ndarray:
         return self.model.get_data(self._get_directory(idx), names)
@@ -223,27 +241,31 @@ def run():
     parser.add_argument('--config', required=True, help='Config file to do the thing')
     parser.add_argument('--dry', action='store_true',)
     args = parser.parse_args()
-    if not args.dry:
-        print('only dry implemented')
-        return
     if args.config:
-        print('Using config ', args.config)
+        print(f'Using config `{args.config}`')
     with open(args.config, 'r') as f:
         content = yaml.safe_load(f)
+    experiment = Experiment(content['experiment'][0])
     models = Models(content['model'])
     experiment = Experiment(content['experiment'][0])
     biomarkers = Biomarkers(content['biomarkers'])
     calibration = Calibration(content['calibration'])
-    print('\n--script-running--')
 
-    # Run all experiments
-    experiment.dry(models)
+    if args.dry:
+        # Run all experiments
+        experiment.dry(models)
 
-    # Calculate biomarkers for each `target` instance
-    biomarkers.dry(experiment)
+        # Calculate biomarkers for each `target` instance
+        biomarkers.dry(experiment)
 
-    # Go through each calibration condition
-    print(calibration)
+        # Go through each calibration condition
+        print(calibration)
+    else:
+        # Run all experiments
+        experiment.run(models)
+
+        # Calculate biomarkers for each `target` instance
+        biomarkers.run(experiment)
 
 
 if __name__ == '__main__':
