@@ -1,14 +1,29 @@
 # describe how model should be run
 model:
 - id: "my_matlab_model"
-  exec: "echo"
+  exec: "/home/mr0661/software/openCARP/_build/bin/bench"
   param_key: "%#"
   base_directory: "/home/mr0661/projects/population_of_models/_model" # Directory that is copied for each 
-- par: "matlab"
-- par: "-run main_hiPSC_CM_CE.m"
-- par: "\"INa_g_max=%1, If_g_max*%2\""
-- par: "--simulation_length=800"
-- par: "--stimulated=true"
+- par: "--load-module '/home/mr0661/projects/population_of_models/_model/_amin2024.so'"
+- par: "--duration 100000.0"
+- par: "--dt 0.01"
+- par: "--dt-out 0.1"
+- par: "--numstim 0"
+- par: "--validate"
+- par: "--save-ini-file end_state.sv"
+- par: "--save-ini-time 100000.0"
+- par: "--fout=job_data_amin2024"
+- par: "--read-ini-file=initial.sv"
+- par: "--imp-par i_stim_on=0"
+- val: "time"
+  method: "binary"
+  file: "job_data_amin2024.t.bin"
+- val: "Vm"
+  method: "binary"
+  file: "job_data_amin2024.Vm.bin"
+- val: "Cai"
+  method: "binary"
+  file: "job_data_amin2024__amin2024.Cai.bin"
 
 # how model should be run and with what parameters
 experiment:
@@ -24,7 +39,7 @@ experiment:
 # list biomarkers that should be calculated
 biomarkers:
 - id: "all_biomarkerss" # Id for this set of biomarkers
-  window: "end-10s:end"
+  window: "end-10:end"
   target: "mylatin"
   file: "biomarkers.csv"
 - biomarker: "MDP"

@@ -7,6 +7,7 @@ import numpy as np
 import os
 import subprocess
 import shutil
+import matplotlib.pyplot as plt # temp debug
 
 class Model:
     def __init__(self, full_args) -> None:
@@ -14,6 +15,7 @@ class Model:
         self.base_directory = None
         self.param_key = ''
         self.pars = []
+        self.vals = {}
         for args in full_args:
             if 'exec' in args:
                 if self.exec != None:
@@ -25,6 +27,8 @@ class Model:
                 self.param_key = args['param_key']
             if 'par' in args:
                 self.pars.append(args['par'])
+            if 'val' in args:
+                self.vals[args['val']] = args
             if 'base_directory' in args:
                 if self.base_directory != None:
                     raise ValueError('Multiple model base directories defined.')
@@ -33,6 +37,8 @@ class Model:
             self.param_key = '%#%'
         if self.exec == None:
             raise ValueError('exec not defined')
+        print("self.vals")
+        print(self.vals)
 
     def __str__(self) -> str:
         return f"{self.exec} {' '.join(self.pars)}"
@@ -57,16 +63,47 @@ class Model:
 
     def run(self, current_wd, parameters) -> None:
         command = self._create_command(parameters)
-        os.makedirs(current_wd, exist_ok=True)
+        shutil.rmtree(current_wd, ignore_errors=True)
         if self.base_directory != None:
             shutil.copytree(self.base_directory, current_wd)
+        else:
+            os.makedirs(current_wd, exist_ok=True)
+        cmd_file = open(f'{current_wd}/cmd.txt', 'w')
         stdout_file = open(f'{current_wd}/stdout.txt', 'w')
-        subprocess.call(command, cwd=current_wd, stdout=stdout_file)
+        stderr_file = open(f'{current_wd}/stderr.txt', 'w')
+        cmd_file.write(' '.join(command))
+        cmd_file.write('\n')
 
-    def get_data(self, directory: str, names: list) -> np.ndarray:
-        # TODO get the described with names from directory
-        return  np.ndarray([])
+        subprocess.run(' '.join(command), shell=True, cwd=current_wd, stdout=stdout_file, stderr=stderr_file)
 
+
+    def get_data(self, directory: str, names: list) -> dict:
+        ret_data = {}
+        for name in names:
+            if not name in self.vals:
+                raise ValueError(f'`{name}`-val not found from model')
+            value_data = self.vals[name]
+            if value_data['method'] == 'binary':
+                val = Model.get_binary_data(directory, value_data)
+                ret_data[name] = val
+            elif value_data['method'] == 'openCARP_trace':
+                ret_data[name] = Model.get_openCARP_trace_data(directory, value_data)
+            else:
+                raise ValueError(f'undefined method to read the data')
+        return ret_data
+
+    @staticmethod
+    def get_binary_data(directory: str, value_data: dict) -> np.ndarray:
+        return np.fromfile(f'{directory}/{value_data["file"]}')
+
+    @staticmethod
+    def get_openCARP_trace_data(directory: str, value_data: dict) -> np.ndarray:
+        header = value_data['header']
+        header_name = value_data['name']
+        # first find index
+        # read the file
+        # select array
+        return np.fromfile(f'{directory}/{value_data["file"]}')
 
 class Models:
     def __init__(self, args) -> None:
@@ -76,8 +113,13 @@ class Models:
             tmp_args = [args[location]]
             id = args[location]['id']
             location += 1
-            while location < len(args) and 'par' in args[location]:
-                tmp_args.append(args[location])
+            while location < len(args):
+                if 'par' in args[location]:
+                    tmp_args.append(args[location])
+                elif 'val' in args[location]:
+                    tmp_args.append(args[location])
+                else:
+                    break
                 location += 1
             self.models[id] = Model(tmp_args)
 
@@ -107,7 +149,7 @@ class Experiment:
 
     def _get_directory(self, idx) -> str:
         str_length = len(str(self.cells))
-        return self.name.replace('#', str(idx+1).rjust(str_length, '0'))
+        return f'{self.cwd}/{self.name.replace("#", str(idx+1).rjust(str_length, "0"))}'
 
     def _generate_parameters(self) -> np.ndarray:
         if self.parametrization == 'latin_hybercube':
@@ -143,13 +185,11 @@ class Experiment:
         manifest = self._generate_manifest(parameters)
 
         for idx in range(0, self.cells):
-            directory = self._get_directory(idx)
-            full_path = self.cwd + "/" + directory
+            full_path = self._get_directory(idx)
             method(self.model, full_path, parameters[idx,:])
         return manifest
 
-
-    def get_data(self, names: list, idx: int) -> np.ndarray:
+    def get_data(self, names: list, idx: int) -> dict:
         return self.model.get_data(self._get_directory(idx), names)
 
 TIME = 'time'
@@ -163,6 +203,10 @@ class MDP:
     def required_data(self) -> list:
         return [TIME, VM]
 
+    def calculate(self, data) -> np.number:
+        return np.number(1.0)
+
+
 class APD90:
     def __init__(self) -> None:
         pass
@@ -170,12 +214,18 @@ class APD90:
     def required_data(self) -> list:
         return [TIME, VM]
 
+    def calculate(self, data) -> np.number:
+        return np.number(1.0)
+
 class APD60:
     def __init__(self) -> None:
         pass
 
     def required_data(self) -> list:
         return [TIME, VM]
+
+    def calculate(self, data) -> np.number:
+        return np.number(1.0)
 
 
 class Biomarkers:
@@ -262,8 +312,13 @@ def run():
         print(calibration)
     else:
         # Run all experiments
-        experiment.run(models)
+        experiment.dry(models)
 
+        # points = experiment.get_data(['time', 'Cai', 'Vm'], 0)
+        # plt.plot(points['time'], points['Vm'])
+        # plt.show()
+
+        print("START biomarker")
         # Calculate biomarkers for each `target` instance
         biomarkers.run(experiment)
 
