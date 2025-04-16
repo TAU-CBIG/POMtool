@@ -79,15 +79,24 @@ class Model:
 
     def get_data(self, directory: str, names: list) -> dict:
         ret_data = {}
+        # opencarp = np.genfromtxt(args.name, delimiter=' ')
+        traces = {}
+        headers = {}
         for name in names:
             if not name in self.vals:
                 raise ValueError(f'`{name}`-val not found from model')
             value_data = self.vals[name]
             if value_data['method'] == 'binary':
-                val = Model.get_binary_data(directory, value_data)
-                ret_data[name] = val
+                ret_data[name] = np.fromfile(f'{directory}/{value_data["file"]}')
             elif value_data['method'] == 'openCARP_trace':
-                ret_data[name] = Model.get_openCARP_trace_data(directory, value_data)
+                trace_file = f'{directory}/{value_data["file"]}'
+                header_file = f'{directory}/{value_data["header_file"]}'
+                if not trace_file in traces :
+                    traces[trace_file] = np.genfromtxt(trace_file)
+                    lines = open(header_file, 'r').readlines()
+                    headers[header_file] = ['time'] + [line.replace('\n', '') for line in lines]
+                idx = headers[header_file].index(value_data["header_name"])
+                ret_data[name] = traces[trace_file][:, idx]
             else:
                 raise ValueError(f'undefined method to read the data')
         return ret_data
@@ -96,14 +105,6 @@ class Model:
     def get_binary_data(directory: str, value_data: dict) -> np.ndarray:
         return np.fromfile(f'{directory}/{value_data["file"]}')
 
-    @staticmethod
-    def get_openCARP_trace_data(directory: str, value_data: dict) -> np.ndarray:
-        header = value_data['header']
-        header_name = value_data['name']
-        # first find index
-        # read the file
-        # select array
-        return np.fromfile(f'{directory}/{value_data["file"]}')
 
 class Models:
     def __init__(self, args) -> None:
@@ -314,9 +315,9 @@ def run():
         # Run all experiments
         experiment.dry(models)
 
-        # points = experiment.get_data(['time', 'Cai', 'Vm'], 0)
-        # plt.plot(points['time'], points['Vm'])
-        # plt.show()
+        points = experiment.get_data(['time', 'Cai', 'Vm', 'iStim'], 0)
+        plt.plot(points['time'], points['iStim'])
+        plt.show()
 
         print("START biomarker")
         # Calculate biomarkers for each `target` instance

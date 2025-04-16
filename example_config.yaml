@@ -14,7 +14,7 @@ model:
 - par: "--save-ini-time 100000.0"
 - par: "--fout=job_data_amin2024"
 - par: "--read-ini-file=initial.sv"
-- par: "--imp-par i_stim_on=0"
+- par: "--imp-par i_stim_on=1"
 - val: "time"
   method: "binary"
   file: "job_data_amin2024.t.bin"
@@ -24,6 +24,11 @@ model:
 - val: "Cai"
   method: "binary"
   file: "job_data_amin2024__amin2024.Cai.bin"
+- val: "iStim"
+  method: "openCARP_trace"
+  file: "Trace_0.dat"
+  header_file: "_amin2024_trace_header.txt"
+  header_name: "i_stim"
 
 # how model should be run and with what parameters
 experiment:
