@@ -37,15 +37,18 @@ def run():
         print(calibration)
     else:
         # Run all experiments
-        experiment.dry(models)
+        # experiment.dry(models)
+
+        # print("START biomarker")
+        # Calculate biomarkers for each `target` instance
+        # biomarkers.run(experiment)
+        # print('biomarkers: ', biomarkers.biomarkers)
+
+        calibration.run()
 
         # points = experiment.get_data(['time', 'Cai', 'Vm', 'iStim'], 0)
         # plt.plot(points['time'], points['Cai'])
         # plt.show()
-
-        print("START biomarker")
-        # Calculate biomarkers for each `target` instance
-        biomarkers.run(experiment)
 
 
 if __name__ == '__main__':

@@ -16,7 +16,7 @@ class Experiment:
     def __str__(self) -> str:
         return self.id
 
-    def _get_directory(self, idx) -> str:
+    def get_directory(self, idx) -> str:
         str_length = len(str(self.cells))
         return f'{self.cwd}/{self.name.replace("#", str(idx+1).rjust(str_length, "0"))}'
 
@@ -31,7 +31,7 @@ class Experiment:
         manifest = ''
         # run for each parameter
         for idx in range(0, self.cells):
-            directory = self._get_directory(idx)
+            directory = self.get_directory(idx)
             manifest_line = [directory]
             for par in parameters[idx,:]:
                 manifest_line.append(str(par))
@@ -54,9 +54,9 @@ class Experiment:
         manifest = self._generate_manifest(parameters)
 
         for idx in range(0, self.cells):
-            full_path = self._get_directory(idx)
+            full_path = self.get_directory(idx)
             method(self.model, full_path, parameters[idx,:])
         return manifest
 
     def get_data(self, names: list, idx: int) -> dict:
-        return self.model.get_data(self._get_directory(idx), names)
+        return self.model.get_data(self.get_directory(idx), names)

@@ -37,14 +37,15 @@ experiment:
   cwd: "/home/mr0661/projects/population_of_models/_example"
   model: "my_matlab_model"
   parametrization: "latin_hybercube"
-  cells: 2
-  parameter_count: 2
+  cells: 1000
+  parameter_count: 5
   manifest: "simulation_manifest.csv"
 
 # list biomarkers that should be calculated
 biomarkers:
 - id: "all_biomarkerss" # Id for this set of biomarkers
-  window: "end-10:end"
+  window_start: "90000"
+  window_end: "100000"
   target: "mylatin"
   file: "biomarkers.csv"
 - biomarker: "MDP"
@@ -53,13 +54,13 @@ biomarkers:
 
 # Contains list of calibrations that should be run
 calibration:
+- file: "_example/biomarkers.csv"
 # calibration condition, basic check, checks if nan or inf
 - protocol: "nonan"
-  if_fail: "discarded_because_of_nans"
-  if_success: "continue"
+  fail_path: "discarded_because_of_nans.csv"
 # calibration condition, check against biomarkers
 - protocol: "biomarker_range"
   biomarked_id: "all_biomarkerss"
-  input_data_path: "/some/path/to/data.csv"
-  if_fail: "discarded"
-  if_success: "selected"
+  input_data_path: "example_range.csv"
+  fail_path: "discarded.csv"
+  success_path: "selected.csv"
