@@ -43,8 +43,7 @@ experiment:
 
 # list biomarkers that should be calculated
 biomarkers:
-- id: "all_biomarkerss" # Id for this set of biomarkers
-  window_start: "90000"
+- window_start: "90000"
   window_end: "100000"
   target: "mylatin"
   file: "biomarkers.csv"
@@ -57,10 +56,9 @@ calibration:
 - file: "_example/biomarkers.csv"
 # calibration condition, basic check, checks if nan or inf
 - protocol: "nonan"
-  fail_path: "discarded_because_of_nans.csv"
+  fail_path: "_example/discarded_because_of_nans.csv"
 # calibration condition, check against biomarkers
-- protocol: "biomarker_range"
-  biomarked_id: "all_biomarkerss"
+- protocol: "range"
   input_data_path: "example_range.csv"
-  fail_path: "discarded.csv"
-  success_path: "selected.csv"
+  fail_path: "_example/discarded.csv"
+  success_path: "_example/selected.csv"

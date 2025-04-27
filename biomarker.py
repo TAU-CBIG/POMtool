@@ -112,7 +112,6 @@ BIOMARKERS = {'MDP': MDP()
 
 class Biomarkers:
     def __init__(self, args) -> None:
-        self.id = args[0]['id']
         self.window_start = args[0].get('window_start', None)
         self.window_end = args[0].get('window_end', None)
         self.target = args[0]['target']
