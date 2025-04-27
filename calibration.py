@@ -88,7 +88,6 @@ class Calibration:
         with open(self.biomarker_file) as csvfile:
             reader = csv.reader(csvfile)
             header = [val.strip() for val in next(reader)]
-            print('header: ', header)
             for line in reader:
                 for protocol in self.protocols:
                     looks = dict(zip(header, [convert_to(value) for value in line]))
