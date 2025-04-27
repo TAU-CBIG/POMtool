@@ -10,9 +10,9 @@ import calibration as cal
 
 def run():
     parser = argparse.ArgumentParser(
-            prog='Foobar',
+            prog='main',
             description='Generate population of models based on the config file given',
-            epilog='See example'
+            epilog='See example_config.yaml for the config'
             )
     parser.add_argument('--config', required=True, help='Config file to do the thing')
     parser.add_argument('--dry', action='store_true',help='Run without actually doing the experiment.')
