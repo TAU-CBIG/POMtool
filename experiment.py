@@ -38,6 +38,11 @@ class Experiment:
             manifest += (', '.join(manifest_line)) + ";\n"
         return manifest
 
+    def empty_run(self, models: model.Models) -> None:
+        def nop(arg1, arg2, arg3):
+            pass
+        self._internal_run(models, nop)
+
     def dry(self, models: model.Models) -> None:
         print(f"Manifest {self.cwd + '/' + self.manifest_file_name}: ")
         print(self._internal_run(models, model.Model.dry))

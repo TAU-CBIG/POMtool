@@ -31,8 +31,6 @@ class Model:
             self.param_key = '%#%'
         if self.exec == None:
             raise ValueError('exec not defined')
-        print("self.vals")
-        print(self.vals)
 
     def __str__(self) -> str:
         return f"{self.exec} {' '.join(self.pars)}"
@@ -93,7 +91,6 @@ class Model:
             else:
                 raise ValueError(f'undefined method to read the data')
         return ret_data
-
 
 class Models:
     def __init__(self, args) -> None:
