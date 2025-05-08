@@ -14,7 +14,7 @@ model:
 - par: "--save-ini-time 100000.0"
 - par: "--fout=job_data_amin2024"
 - par: "--read-ini-file=initial.sv"
-- par: "--imp-par i_stim_on=1"
+- par: "--imp-par i_stim_on=1,ADP_TUNE=%1,Pi_ref_TUNE=%2,ap2_TUNE=%3,F1_TUNE=%4,F2_TUNE=%5"
 - val: "time"
   method: "binary"
   file: "job_data_amin2024.t.bin"
