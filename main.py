@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 
 import argparse
+import pathlib
+import shutil
 import yaml
 import matplotlib.pyplot as plt # temp debug
 import experiment as exp
@@ -23,9 +25,11 @@ def run():
     parser.add_argument('--only-biomarkers', action='store_true',help='Only run biomarkers, you need to have experiment already run and in correct format')
     parser.add_argument('--skip-calibration', action='store_true',help='Skip calibration')
     parser.add_argument('--only-calibration', action='store_true',help='Only run calibration, assumes you have run previous steps already and have the data')
+    parser.add_argument('--force', action='store_true', help='Override existing files during the experiment')
     args = parser.parse_args()
     def noprint(*values: object,):
         pass
+
     myprint = noprint if args.silent else print
     if args.config:
         myprint(f'Using config `{args.config}`')
@@ -45,6 +49,13 @@ def run():
     if not args.skip_experiment:
         myprint('Start experiments')
         if not args.dry:
+            if pathlib.Path(experiment.cwd).exists():
+                if args.force:
+                    print("REMOVE:", experiment.cwd)
+                    shutil.rmtree(experiment.cwd)
+                else:
+                    raise FileExistsError(f'Target directory exists `{experiment.cwd}`')
+
             experiment.run(models)
         else:
             experiment.dry(models)
