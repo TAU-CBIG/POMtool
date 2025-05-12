@@ -11,36 +11,44 @@ STIM = 'iStim'
 CSV_SEPARATOR = ', '
 CSV_ENDLINE = '\n'
 
+class Beat:
+    def __init__(self) -> None:
+        self.data = {}
+        self.bot_idx = 0
+        self.top_idx = 0
+
 class Window:
-    # TODO: remove use of range, it actually creates copy and not view
     def __init__(self, original_data: dict) -> None:
         self.data = original_data
-        self.top = np.ndarray([])
-        self.bot = np.ndarray([])
-        self.win = range(0) 
+        self.top = np.ndarray([]) # For each peak
+        self.bot = np.ndarray([]) # For each peak
+        self.win = {} # Our windowed data (dictionary)
         self.mdp_all = None # All minimum action potentials, ie valleys
-        self.ap = np.ndarray([])  # Maximum action potentials, ie peaks
         self.mdp = np.ndarray([]) # Minimum action potentials, ie valleys
-        self.is_stimulated = False
-        self.is_top_calculated = False
-        self.is_win_calculated = False
+        self.is_stimulated = False # Detected if data is stimulated
+        self.is_win_calculated = False # flag to set when win is calculated
+        self.is_top_calculated = False # flag to set when top is calculated
+        self.beats = [] # views describing the peaks
+        self.beat_count = 4
 
     def make_win(self) -> None:
         '''Makes window indexes based on the given data, call to make sure win exists'''
         if self.is_win_calculated:
             return
         self.is_win_calculated = True
-        numberOfPeaks = 4
+
         # TODO add some minimum distance for the peaks (or valleys) so we don't get something weird, should depend on dt
         self.mdp_all, _ = scipy.signal.find_peaks(-self.data['Vm'])
-        extra_front_space = 600
-        self.win = range(self.mdp_all[-1-numberOfPeaks] - extra_front_space, self.mdp_all[-1])
-        self.mdp = self.mdp_all[-1-numberOfPeaks:-1] - self.win.start
 
-        self.ap, _ = scipy.signal.find_peaks(self.data['Vm'][self.win])
-        self.ap += self.win.start
-        plt.plot(self.data['time'][self.ap], self.data['Vm'][self.ap], 'x')
-        self.ap -= self.win.start
+        # find beats defined from bottom-to-bottom, amount described in beat_count, detected from Vm
+        for i in range(0, self.beat_count):
+            start_idx = self.mdp_all[-1-self.beat_count + i]
+            end_idx = self.mdp_all[-1-self.beat_count + i + 1]
+            beat = Beat()
+            for key in self.data:
+                # Make view of each data name per beat
+                beat.data[key] = self.data[key][start_idx:end_idx]
+            self.beats.append(beat)
 
         if 'iStim' in self.data:
             if 1 < len(np.unique(self.data['iStim'])):
@@ -54,12 +62,12 @@ class Window:
         self.make_win()
 
         if self.is_stimulated:
-            self.bot = np.nonzero(0 < np.diff(self.data['iStim'][self.win]))[0]
-            plt.plot(self.data['time'][self.win][self.bot], self.data['Vm'][self.win][self.bot], 'x')
-            self.top = self.ap
+            for beat in self.beats:
+                beat.bot_idx = np.nonzero(0 < np.diff(beat.data['iStim']))[0]
+                beat.top_idx, _ = scipy.signal.find_peaks(beat.data['Vm'])
+                print(beat.bot_idx, beat.top_idx)
         else:
             raise ValueError('Only implemented for stimulated')
-        plt.plot(self.data['time'][self.win], self.data['Vm'][self.win])
 
 
 class MDP:
@@ -73,8 +81,10 @@ class MDP:
         return [TIME, VM, STIM]
 
     def calculate(self, window: Window) -> float:
-        print(window.mdp)
-        return window.data['Vm'][window.win][window.mdp].mean()
+        all_values = np.zeros(len(window.beats))
+        for i in range(window.beat_count):
+            all_values[i] = window.beats[i].data['Vm'][0]
+        return all_values.mean()
 
 class APD_N:
     '''action potential duration at N% repolarization'''
@@ -89,20 +99,26 @@ class APD_N:
 
     def calculate(self, window: Window) -> float:
         window.make_top()
-        top = window.data['Vm'][window.win][window.top]
-        bot = window.data['Vm'][window.win][window.bot]
-        heights = (1 - (self.N/100))*(top - bot) + bot
-        all_values = np.zeros(len(heights))
+        all_values = np.zeros(len(window.beats))
+        i = 0
+        beat: Beat
+        for beat in window.beats:
+            top = beat.data['Vm'][beat.top_idx]
+            bot = beat.data['Vm'][beat.bot_idx]
 
-        for i in range(len(heights)):
-            height = heights[i]
-            pulse_win = range(window.mdp[i], window.mdp[i+1] if i < len(heights) - 1 else window.win.stop - window.win.start)
-            at_height = np.argwhere(window.data['Vm'][window.win][pulse_win] > height).ravel()
-            print(height)
-            print(at_height)
-            print(at_height[-1])
-            print(at_height[0])
-            all_values[i] = window.data['time'][window.win][at_height[-1]] - window.data['time'][window.win][at_height[0]]
+            # Scale to N% from the top
+            value_height = ((1 - self.N/100) * (top-bot)) + bot
+
+            # Two values at given height, (start and end)
+            at_height = np.argwhere(beat.data['Vm'] > value_height).ravel()
+            all_values[i] = beat.data['time'][at_height[-1]] - beat.data['time'][at_height[0]]
+            i += 1
+            # Debug printing if you want to check what is actually happening
+            # plt.plot(beat.data['time'],beat.data['Vm'])
+            # plt.plot(beat.data['time'][beat.bot_idx], beat.data['Vm'][beat.bot_idx], 'x')
+            # plt.plot(beat.data['time'][beat.top_idx], beat.data['Vm'][beat.top_idx], 'o')
+            # plt.plot(beat.data['time'][[at_height[1], at_height[-1]]], [value_height, value_height])
+            # plt.show()
 
         return all_values.mean()
 
