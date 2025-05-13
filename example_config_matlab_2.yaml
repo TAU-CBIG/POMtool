@@ -1,0 +1,58 @@
+# describe how model should be run
+model:
+- id: "my_matlab_model"
+  exec: "matlab"
+  param_key: "%#"
+  base_directory: "C:/Users/oylin/Documents/The hiMCES model/hiMCES model clean codes 2"
+- par: -batch
+- par: funz_main_hiMCES(%1,%2, %3, %4, %5)
+- val: "time"
+  method: "matlab"
+  file: "job_data_amin2024.mat"
+  id: "time"
+- val: "Vm"
+  method: "matlab"
+  file: "job_data_amin2024.mat"
+  id: "Vm"
+- val: "iStim"
+  method: "matlab"
+  file: "job_data_amin2024.mat"
+  id: "iStim"
+- val: "Cai"
+  method: "matlab"
+  file: "job_data_amin2024.mat"
+  id: "Cai"
+
+
+# how model should be run and with what parameters
+experiment:
+- name: "mylatin_#" # '#' is to be replaced with id-number
+  id: "mylatin"
+  cwd: "C:/Users/oylin/Documents/population_calibration/_example"
+  model: "my_matlab_model"
+  parametrization: "latin_hybercube"
+  cells: 1
+  parameter_count: 5
+  manifest: "simulation_manifest.csv"
+
+# list biomarkers that should be calculated
+biomarkers:
+- window_start: "4500"
+  window_end: "10000"
+  target: "mylatin"
+  file: "biomarkers.csv"
+- biomarker: "MDP"
+- biomarker: "APD90"
+- biomarker: "APD60"
+
+# Contains list of calibrations that should be run
+calibration:
+- file: "C:/Users/oylin/Documents/population_calibration/_example/biomarkers.csv"
+# calibration condition, basic check, checks if nan or inf
+- protocol: "nonan"
+  fail_path: "C:/Users/oylin/Documents/population_calibration/_example/discarded_because_of_nans.csv"
+# calibration condition, check against biomarkers
+- protocol: "range"
+  input_data_path: "example_range.csv"
+  fail_path: "C:/Users/oylin/Documents/population_calibration/_example/discarded.csv"
+  success_path: "C:/Users/oylin/Documents/population_calibration/_example/selected.csv"

@@ -2,6 +2,7 @@ import numpy as np
 import os
 import shutil
 import subprocess
+import scipy.io
 
 class Model:
     def __init__(self, full_args) -> None:
@@ -73,6 +74,8 @@ class Model:
         # opencarp = np.genfromtxt(args.name, delimiter=' ')
         traces = {}
         headers = {}
+        mat_files ={}
+
         for name in names:
             if not name in self.vals:
                 raise ValueError(f'`{name}`-val not found from model')
@@ -88,6 +91,12 @@ class Model:
                     headers[header_file] = ['time'] + [line.replace('\n', '') for line in lines]
                 idx = headers[header_file].index(value_data["header_name"])
                 ret_data[name] = traces[trace_file][:, idx]
+            elif value_data['method'] == 'matlab':
+                filename = f'{directory}/{value_data["file"]}'
+                item_id = value_data["id"]
+                if filename not in mat_files:
+                    mat_files[filename] = scipy.io.loadmat(f'{directory}/{value_data["file"]}')
+                ret_data[item_id] = mat_files[filename][item_id].flatten()
             else:
                 raise ValueError(f'undefined method to read the data')
         return ret_data
