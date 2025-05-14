@@ -19,6 +19,8 @@ def run():
     parser.add_argument('--config', required=True, help='Config file to do the thing')
     parser.add_argument('--dry', action='store_true',help='Run without actually doing the experiment.')
     parser.add_argument('--silent', action='store_true',help='Silent control flow printing')
+    parser.add_argument('--patch_count', help='Define how many patches are going to be used', default=1, metavar="N", type=int)
+    parser.add_argument('--patch_idx', help='Define what patch is going to be used for this specific run, range [0,patch_count)', default=0, metavar="IDX", type=int)
     parser.add_argument('--skip-experiment', action='store_true',help='Skip experiment, it is assumed you already have run experiment')
     parser.add_argument('--only-experiment', action='store_true',help='Only run experiment')
     parser.add_argument('--skip-biomarkers', action='store_true',help='Skip biomarkers, following steps might expect biomarkers to exist')
@@ -45,7 +47,7 @@ def run():
         args.skip_experiment = True
         args.skip_biomarkers = True
     models = mod.Models(content['model'])
-    experiment = exp.Experiment(content['experiment'][0])
+    experiment = exp.Experiment(content['experiment'][0], args.patch_idx, args.patch_count)
     if not args.skip_experiment:
         myprint('Start experiments')
         if not args.dry:

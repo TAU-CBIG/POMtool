@@ -3,7 +3,7 @@ import numpy as np
 import scipy.stats as sstats
 
 class Experiment:
-    def __init__(self, args) -> None:
+    def __init__(self, args, patch_idx: int, patch_count: int) -> None:
         self.name = args['name']
         self.id = args['id']
         self.model_id = args['model']
@@ -13,6 +13,21 @@ class Experiment:
         self.parameter_count = args['parameter_count']
         self.manifest_file_name = args['manifest']
         self.equation = args['equation'] if 'equation' in args else ""
+        if patch_idx < 0:
+            raise ValueError(f"Patch index cannot be less than zero (was `{patch_idx}`)")
+        if patch_idx == patch_count:
+            raise ValueError(f"Patch index too large: was equal to patch count (was `{patch_idx}`)")
+        if patch_idx > patch_count:
+            raise ValueError(f"Patch index too large: index (was `{patch_idx}`) greater to patch count (was `{patch_count}`)")
+
+        # First patches are longer, if patch sizes cannot be divided equally
+        patch_length_small = int(self.cells/patch_count)
+        patch_mod = self.cells % patch_count
+        patch_length = patch_length_small + (1 if patch_idx < patch_mod else 0)
+        patch_start = patch_length_small * patch_idx + min(patch_idx, patch_mod)
+
+        # Patch range
+        self.patch = range(patch_start, patch_start + patch_length)
 
 
     def __str__(self) -> str:
@@ -34,7 +49,7 @@ class Experiment:
     def _generate_manifest(self, parameters: np.ndarray) -> str:
         manifest = ''
         # run for each parameter
-        for idx in range(0, self.cells):
+        for idx in self.patch:
             directory = self.get_directory(idx)
             manifest_line = [directory]
             for par in parameters[idx,:]:
@@ -62,7 +77,7 @@ class Experiment:
         parameters = self._generate_parameters()
         manifest = self._generate_manifest(parameters)
 
-        for idx in range(0, self.cells):
+        for idx in self.patch:
             full_path = self.get_directory(idx)
             method(self.model, full_path, parameters[idx,:])
         return manifest

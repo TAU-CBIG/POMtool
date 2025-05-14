@@ -165,7 +165,7 @@ class Biomarkers:
         header = [str(bm) for bm in self.biomarkers]
         all_results = []
         # get data through the experiment needed for the biomarkers
-        for idx in range(0, experiment.cells):
+        for idx in experiment.patch:
             # get data through the experiment needed for the biomarkers
             data = Window(experiment.get_data(names, idx))
             data.make_top()
