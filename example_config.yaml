@@ -37,6 +37,7 @@ experiment:
   cwd: "/home/mr0661/projects/population_of_models/_example"
   model: "my_matlab_model"
   parametrization: "latin_hybercube"
+  equation: "0.5 + x + np.heaviside(x-0.5, 0.0)*(x-0.5)" # range 0.5-2
   cells: 12
   parameter_count: 5
   manifest: "simulation_manifest.csv"

@@ -12,6 +12,8 @@ class Experiment:
         self.cells = args['cells']
         self.parameter_count = args['parameter_count']
         self.manifest_file_name = args['manifest']
+        self.equation = args['equation'] if 'equation' in args else ""
+
 
     def __str__(self) -> str:
         return self.id
@@ -21,11 +23,13 @@ class Experiment:
         return f'{self.cwd}/{self.name.replace("#", str(idx+1).rjust(str_length, "0"))}'
 
     def _generate_parameters(self) -> np.ndarray:
+        x = np.ndarray([])
         if self.parametrization == 'latin_hybercube':
             sampler = sstats.qmc.LatinHypercube(d=self.parameter_count, seed=0)
-            return sampler.random(n=self.cells)
+            x = sampler.random(n=self.cells)
         else:
             raise ValueError(f'parametrization method "{self.parametrization}" not recognized')
+        return x if not self.equation else eval(f'{self.equation}')
 
     def _generate_manifest(self, parameters: np.ndarray) -> str:
         manifest = ''
