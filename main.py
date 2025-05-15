@@ -64,7 +64,7 @@ def run():
         myprint('End experiments')
     if not args.skip_biomarkers:
         myprint('Start biomarkers')
-        biomarkers = bm.Biomarkers(content['biomarkers'])
+        biomarkers = bm.Biomarkers(content['biomarkers'], args.patch_idx, args.patch_count)
         if args.skip_experiment:
             experiment.empty_run(models)
         if not args.dry:
@@ -75,7 +75,7 @@ def run():
     if not args.skip_calibration:
         myprint('Start calibration')
         if not args.dry:
-            calibration = cal.Calibration(content['calibration'])
+            calibration = cal.Calibration(content['calibration'], experiment, args.patch_idx, args.patch_count)
             calibration.run()
         else:
             print(content['calibration'])

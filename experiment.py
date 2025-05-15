@@ -1,17 +1,18 @@
 import model
 import numpy as np
 import scipy.stats as sstats
+import utility
 
 class Experiment:
     def __init__(self, args, patch_idx: int, patch_count: int) -> None:
         self.name = args['name']
         self.id = args['id']
         self.model_id = args['model']
-        self.cwd = args['cwd']
+        self.cwd = utility.append_patch(args['cwd'], patch_idx, patch_count)
         self.parametrization = args['parametrization']
         self.cells = args['cells']
         self.parameter_count = args['parameter_count']
-        self.manifest_file_name = args['manifest']
+        self.manifest_file_name = utility.append_patch(args['manifest'], patch_idx, patch_count)
         self.equation = args['equation'] if 'equation' in args else ""
         if patch_idx < 0:
             raise ValueError(f"Patch index cannot be less than zero (was `{patch_idx}`)")

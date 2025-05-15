@@ -47,12 +47,12 @@ biomarkers:
 
 # Contains list of calibrations that should be run
 calibration:
-- file: "C:/Users/oylin/Documents/population_calibration/_example/biomarkers.csv"
+- file: "biomarkers.csv"
 # calibration condition, basic check, checks if nan or inf
 - protocol: "nonan"
-  fail_path: "C:/Users/oylin/Documents/population_calibration/_example/discarded_because_of_nans.csv"
+  fail_path: "discarded_because_of_nans.csv"
 # calibration condition, check against biomarkers
 - protocol: "range"
   input_data_path: "example_range.csv"
-  fail_path: "C:/Users/oylin/Documents/population_calibration/_example/discarded.csv"
-  success_path: "C:/Users/oylin/Documents/population_calibration/_example/selected.csv"
+  fail_path: "discarded.csv"
+  success_path: "selected.csv"

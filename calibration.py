@@ -1,5 +1,8 @@
 import csv
 import math
+import pathlib
+import utility
+import experiment as exp
 
 def convert_to(value: str):
     try:
@@ -8,17 +11,19 @@ def convert_to(value: str):
         return value
 
 class Protocol:
-    def __init__(self, args) -> None:
+    def __init__(self, args, cwd, patch_idx, patch_count) -> None:
         self.method = args['protocol']
         self.contains_fail_path = 'fail_path' in args
         self.contains_success_path = 'success_path' in args
         if self.contains_fail_path:
-            self.fail_path = args['fail_path']
+            self.fail_path = cwd + '/' + utility.append_patch(args['fail_path'], patch_idx, patch_count)
+            pathlib.Path(self.fail_path).parent.mkdir(exist_ok=True, parents=True)
             with open(self.fail_path, 'w'):
                 pass #truncate
 
         if self.contains_success_path:
-            self.success_path = args['success_path']
+            self.success_path = cwd + '/' + utility.append_patch(args['success_path'], patch_idx, patch_count)
+            pathlib.Path(self.success_path).parent.mkdir(exist_ok=True, parents=True)
             with open(self.success_path, 'w'):
                 pass #truncate
 
@@ -75,11 +80,11 @@ class Protocol:
         return True
 
 class Calibration:
-    def __init__(self, args) -> None:
-        self.biomarker_file = args[0]['file']
+    def __init__(self, args, experiment: exp.Experiment, patch_idx: int, patch_count: int) -> None:
+        self.biomarker_file = f"{experiment.cwd}/{utility.append_patch(args[0]['file'], patch_idx, patch_count)}"
         self.protocols = []
         for arg in args[1:]:
-            self.protocols.append(Protocol(arg))
+            self.protocols.append(Protocol(arg, experiment.cwd, patch_idx, patch_count))
 
     def __str__(self) -> str:
         return 'No printing in calibration, sorry'

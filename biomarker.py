@@ -2,6 +2,7 @@ import numpy as np
 import experiment as exp
 import scipy.signal
 import matplotlib.pyplot as plt # temp debug
+import utility
 
 TIME = 'time'
 VM = 'Vm'
@@ -128,11 +129,12 @@ BIOMARKERS = {'MDP': MDP()
               } | { str(APD_N(val)): APD_N(val) for val in APD_VALUES_OF_N}
 
 class Biomarkers:
-    def __init__(self, args) -> None:
+    def __init__(self, args, patch_idx: int, patch_count: int) -> None:
         self.window_start = args[0].get('window_start', None)
         self.window_end = args[0].get('window_end', None)
         self.target = args[0]['target']
         self.file = args[0]['file']
+        self.patch_file = utility.append_patch(self.file, patch_idx, patch_count)
         self.biomarkers = []
         for i in range(1,len(args)):
             bio = args[i]['biomarker']
@@ -177,7 +179,7 @@ class Biomarkers:
             file = open(file_name, 'w')
             file.write(CSV_SEPARATOR.join(header) + CSV_ENDLINE)
             file.write(CSV_SEPARATOR.join(results) + CSV_ENDLINE)
-        file_name = f'{experiment.cwd}/{self.file}'
+        file_name = f'{experiment.cwd}/{self.patch_file}'
         file = open(file_name, 'w')
         file.write(CSV_SEPARATOR.join(['directory'] + header) + CSV_ENDLINE)
         idx = 0
