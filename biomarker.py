@@ -172,6 +172,12 @@ class Biomarkers:
             # get data through the experiment needed for the biomarkers
             data = Window(experiment.get_data(names, idx))
             data.make_top()
+            results = ['nan'] * len(self.biomarkers)
+            for i in range(len(self.biomarkers)):
+                try:
+                    results[i] = str(self.biomarkers[i].calculate(data))
+                except:
+                    results[i] = 'nan'
 
             results = [str(bm.calculate(data)) for bm in self.biomarkers]
             all_results.append(results)
