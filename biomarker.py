@@ -40,7 +40,7 @@ class Window:
 
         # TODO add some minimum distance for the peaks (or valleys) so we don't get something weird, should depend on dt
         # TODO using 0 for threshold, which is arbitrary, should prob use something more meaningful
-        self.mdp_all, _ = scipy.signal.find_peaks(-self.data['Vm'], threshold=0.0)
+        self.mdp_all, _ = scipy.signal.find_peaks(-self.data[VM], threshold=0.0)
 
         # find beats defined from bottom-to-bottom, amount described in beat_count, detected from Vm
         for i in range(0, self.beat_count):
@@ -52,8 +52,8 @@ class Window:
                 beat.data[key] = self.data[key][start_idx:end_idx]
             self.beats.append(beat)
 
-        if 'iStim' in self.data:
-            if 1 < len(np.unique(self.data['iStim'])):
+        if STIM in self.data:
+            if 1 < len(np.unique(self.data[STIM])):
                 self.is_stimulated = True
 
 
@@ -65,8 +65,8 @@ class Window:
 
         if self.is_stimulated:
             for beat in self.beats:
-                beat.bot_idx = np.nonzero(0 < np.diff(beat.data['iStim']))[0]
-                beat.top_idx, _ = scipy.signal.find_peaks(beat.data['Vm'])
+                beat.bot_idx = np.nonzero(0 < np.diff(beat.data[STIM]))[0]
+                beat.top_idx, _ = scipy.signal.find_peaks(beat.data[VM])
                 print(beat.bot_idx, beat.top_idx)
         else:
             raise ValueError('Only implemented for stimulated')
@@ -85,7 +85,7 @@ class MDP:
     def calculate(self, window: Window) -> float:
         all_values = np.zeros(len(window.beats))
         for i in range(window.beat_count):
-            all_values[i] = window.beats[i].data['Vm'][0]
+            all_values[i] = window.beats[i].data[VM][0]
         return all_values.mean()
 
 class APD_N:
@@ -105,21 +105,21 @@ class APD_N:
         i = 0
         beat: Beat
         for beat in window.beats:
-            top = beat.data['Vm'][beat.top_idx]
-            bot = beat.data['Vm'][beat.bot_idx]
+            top = beat.data[VM][beat.top_idx]
+            bot = beat.data[VM][beat.bot_idx]
 
             # Scale to N% from the top
             value_height = ((1 - self.N/100) * (top-bot)) + bot
 
             # Two values at given height, (start and end)
-            at_height = np.argwhere(beat.data['Vm'] > value_height).ravel()
-            all_values[i] = beat.data['time'][at_height[-1]] - beat.data['time'][at_height[0]]
+            at_height = np.argwhere(beat.data[VM] > value_height).ravel()
+            all_values[i] = beat.data[TIME][at_height[-1]] - beat.data[TIME][at_height[0]]
             i += 1
             # Debug printing if you want to check what is actually happening
-            # plt.plot(beat.data['time'],beat.data['Vm'])
-            # plt.plot(beat.data['time'][beat.bot_idx], beat.data['Vm'][beat.bot_idx], 'x')
-            # plt.plot(beat.data['time'][beat.top_idx], beat.data['Vm'][beat.top_idx], 'o')
-            # plt.plot(beat.data['time'][[at_height[1], at_height[-1]]], [value_height, value_height])
+            # plt.plot(beat.data[TIME],beat.data[VM])
+            # plt.plot(beat.data[TIME][beat.bot_idx], beat.data[VM][beat.bot_idx], 'x')
+            # plt.plot(beat.data[TIME][beat.top_idx], beat.data[VM][beat.top_idx], 'o')
+            # plt.plot(beat.data[TIME][[at_height[1], at_height[-1]]], [value_height, value_height])
             # plt.show()
 
         return all_values.mean()
