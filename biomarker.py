@@ -601,6 +601,11 @@ class Biomarkers:
                     results[i] = 'nan'
 
             results = [str(bm.calculate(data)) for bm in self.biomarkers]
+            # Remove following comments to print out biomarkers for each cell
+            #for name, result in zip(header, results):
+            #    print(f"{name}: {result}")
+
+
             all_results.append(results)
             file_name = f'{experiment.get_directory(idx)}/{self.file}'
             file = open(file_name, 'w')
