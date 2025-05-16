@@ -68,6 +68,7 @@ biomarkers:
 - biomarker: "Rate_AP"
 - biomarker: "RAPP_APD"
 - biomarker: "peakTension"
+- biomarker: "cellShortPerc"
 
 # Contains list of calibrations that should be run
 calibration:
