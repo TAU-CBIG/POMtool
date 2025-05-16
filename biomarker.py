@@ -9,6 +9,7 @@ VM = 'Vm'
 CALSIUM = 'Cai'
 STIM = 'iStim'
 FORCE = "Force"
+LSARC = "Lsarc"
 
 CSV_SEPARATOR = ', '
 CSV_ENDLINE = '\n'
@@ -520,6 +521,32 @@ class peakTension:
             maxtension = np.concatenate((maxtension, values))
 
         return np.mean(maxtension)
+
+class cellShortPerc:
+    def __init__(self) -> None:
+        pass
+
+    def __str__(self) -> str:
+        return 'cellShortPerc'
+
+    def required_data(self) -> list:
+        return [LSARC]
+
+    def calculate(self, window: Window) -> float:
+        cellshort = []
+        max_Lsarc = -np.inf
+        for beat in window.beats:
+            Lsarc = beat.data[LSARC]
+            locs, _ = scipy.signal.find_peaks(-Lsarc)
+            values = Lsarc[locs]
+            cellshort = np.concatenate((cellshort, values))
+
+            if np.max(Lsarc) > max_Lsarc:
+                max_Lsarc = np.max(Lsarc)
+
+        Cellshort = np.mean(cellshort)
+        cellshortperc = 100*Cellshort/max_Lsarc
+        return cellshortperc
 
 
 class Biomarkers:
