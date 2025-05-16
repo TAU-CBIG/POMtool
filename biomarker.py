@@ -482,6 +482,24 @@ APD_VALUES_OF_N = [60, 90]
 BIOMARKERS = {'MDP': MDP()
               } | { str(APD_N(val)): APD_N(val) for val in APD_VALUES_OF_N}
 
+class RAPP_APD:
+    def __init__(self) -> None:
+        pass
+
+    def __str__(self) -> str:
+        return 'RAPP_APD'
+
+    def required_data(self) -> list:
+        return [TIME, VM, STIM]
+
+    def calculate(self, window: Window) -> float: #toimii
+        apd30 = APD_N(30).calculate(window)
+        apd40 = APD_N(40).calculate(window)
+        apd70 = APD_N(70).calculate(window)
+        apd80 = APD_N(80).calculate(window)
+
+        return (apd30-apd40)/(apd70-apd80)
+
 class Biomarkers:
     def __init__(self, args, patch_idx: int, patch_count: int) -> None:
         self.window_start = args[0].get('window_start', None)
