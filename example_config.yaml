@@ -60,6 +60,7 @@ biomarkers:
 - biomarker: "RT1050"
 - biomarker: "RT1090"
 - biomarker: "DT9010"
+- biomarker: "RT10Peak"
 
 # Contains list of calibrations that should be run
 calibration:
