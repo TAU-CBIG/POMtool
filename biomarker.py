@@ -480,12 +480,21 @@ class RAPP_APD:
         return [TIME, VM, STIM]
 
     def calculate(self, window: Window) -> float: #toimii
-        apd30 = APD_N(30).calculate(window)
-        apd40 = APD_N(40).calculate(window)
-        apd70 = APD_N(70).calculate(window)
-        apd80 = APD_N(80).calculate(window)
+        values = []
+        def get_ap(win: Window, N: int):
+            name = str(APD_N(N))
+            if str(name) in beat.biomarker:
+                return beat.biomarker[name]
+            else:
+                return APD_N(N).calculate(win)
+        for beat in window.ap_beats():
+            apd30 = get_ap(window, 30)
+            apd40 = get_ap(window, 40)
+            apd70 = get_ap(window, 70)
+            apd80 = get_ap(window, 80)
+            values.append((apd30-apd40)/(apd70-apd80))
 
-        return (apd30-apd40)/(apd70-apd80)
+        return np.mean(values)
 
 class peakTension:
     def __init__(self) -> None:
