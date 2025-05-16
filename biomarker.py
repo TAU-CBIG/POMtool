@@ -463,6 +463,20 @@ class APD_N:
             # plt.show()
 
         return all_values.mean()
+class Rate_AP:
+    def __init__(self) -> None:
+        pass
+
+    def __str__(self) -> str:
+        return 'Rate_AP'
+
+    def required_data(self) -> list:
+        return [TIME, VM, STIM]
+
+    def calculate(self, window: Window) -> float:
+        seconds_in_min = 60
+        scale = 1000
+        return seconds_in_min/float(CL().calculate(window)/scale)
 
 APD_VALUES_OF_N = [60, 90]
 BIOMARKERS = {'MDP': MDP()
