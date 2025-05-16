@@ -217,6 +217,28 @@ class CL:
 
         return np.divide(np.sum(cl), len(cl))
 
+class dv_dt_max:
+    def __init__(self) -> None:
+        pass
+
+    def __str__(self) -> str:
+        return 'dV_dt_max'
+
+    def required_data(self) -> list:
+        return [TIME, VM, STIM]
+
+    def calculate(self, window: Window) -> float:
+        dVM = []
+        for beat in window.beats:
+            value = np.divide(np.diff(beat.data[VM]), np.diff(beat.data[TIME]))
+            dVM= np.concatenate((dVM, value))
+
+        min_distance = APD_N(90).calculate(window)*1000 #s to ms
+        Locations_of_peaks, _ = scipy.signal.find_peaks(dVM,distance=min_distance)
+        dv_dt = dVM[Locations_of_peaks]
+        dv_dt_max = np.divide(np.sum(dv_dt), len(dv_dt))
+        return dv_dt_max
+
 class APD_N:
     '''action potential duration at N% repolarization'''
     def __init__(self, N: int) -> None:
