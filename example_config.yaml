@@ -56,6 +56,7 @@ biomarkers:
 - biomarker: "Rate_Cai"
 - biomarker: "CL"
 - biomarker: "APA"
+- biomarker: "Peak"
 
 # Contains list of calibrations that should be run
 calibration:
