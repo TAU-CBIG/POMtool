@@ -4,8 +4,7 @@ model:
   exec: "matlab"
   param_key: "%#"
   base_directory: "C:/Users/oylin/Documents/The hiMCES model/hiMCES model clean codes 2"
-- par: -batch
-- par: funz_main_hiMCES(%1,%2, %3, %4, %5)
+- par: -batch "funz_main_hiMCES(%1,%2, %3, %4, %5)"
 - val: "time"
   method: "matlab"
   file: "job_data_amin2024.mat"
