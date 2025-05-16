@@ -532,7 +532,6 @@ class cellShortPerc:
         cellshortperc = 100*Cellshort/max_Lsarc
         return cellshortperc
 
-APD_VALUES_OF_N = [60, 90]
 BIOMARKERS = {'MDP': MDP(),
               'Max_Cai': Max_Cai(),
               'Min_Cai': Min_Cai(),
@@ -543,7 +542,16 @@ BIOMARKERS = {'MDP': MDP(),
               'Peak': Peak(),
               'RT1050': RTNM(10, 50),
               'RT1090': RTNM(10, 90),
-              } | { str(APD_N(val)): APD_N(val) for val in APD_VALUES_OF_N}
+              'APD10': APD_N(10),
+              'APD20': APD_N(20),
+              'APD30': APD_N(30),
+              'APD40': APD_N(40),
+              'APD50': APD_N(50),
+              'APD60': APD_N(60),
+              'APD70': APD_N(70),
+              'APD80': APD_N(80),
+              'APD90': APD_N(90),
+              }
 
 
 class Biomarkers:
