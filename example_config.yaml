@@ -62,6 +62,9 @@ biomarkers:
 - biomarker: "DT9010"
 - biomarker: "RT10Peak"
 - biomarker: "CAI_DURATION"
+- biomarker: "CTD30"
+- biomarker: "CTD50"
+- biomarker: "CTD90"
 
 # Contains list of calibrations that should be run
 calibration:
