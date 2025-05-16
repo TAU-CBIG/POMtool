@@ -53,6 +53,7 @@ biomarkers:
 - biomarker: "APD60"
 - biomarker: "Max_Cai"
 - biomarker: "Min_Cai"
+- biomarker: "Rate_Cai"
 
 # Contains list of calibrations that should be run
 calibration:

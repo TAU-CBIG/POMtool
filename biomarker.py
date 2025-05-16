@@ -536,6 +536,7 @@ APD_VALUES_OF_N = [60, 90]
 BIOMARKERS = {'MDP': MDP(),
               'Max_Cai': Max_Cai(),
               'Min_Cai': Min_Cai(),
+              'Rate_Cai': Rate_Cai(),
               } | { str(APD_N(val)): APD_N(val) for val in APD_VALUES_OF_N}
 
 
