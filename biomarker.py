@@ -19,7 +19,6 @@ class Beat:
         self.data = {}
         self.bot_idx = 0
         self.top_idx = 0
-        self.mdp = []
 
 class Cai_Beat:
     def __init__(self) -> None:
@@ -202,7 +201,7 @@ class CL:
     def calculate(self, window: Window) -> np.ndarray:
         cl = []
         for beat in window.ap_beats():
-            cl.append(beat.data[TIME][beat.mdp])
+            cl.append(beat.data[TIME][0])
         cl = np.diff(cl)
 
         return np.divide(np.sum(cl), len(cl))
