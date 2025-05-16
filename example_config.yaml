@@ -57,6 +57,8 @@ biomarkers:
 - biomarker: "CL"
 - biomarker: "APA"
 - biomarker: "Peak"
+- biomarker: "RT1050"
+- biomarker: "RT1090"
 
 # Contains list of calibrations that should be run
 calibration:

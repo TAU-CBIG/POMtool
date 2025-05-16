@@ -541,6 +541,8 @@ BIOMARKERS = {'MDP': MDP(),
               'dv_dt_max': dv_dt_max(),
               'APA': APA(),
               'Peak': Peak(),
+              'RT1050': RTNM(10, 50),
+              'RT1090': RTNM(10, 90),
               } | { str(APD_N(val)): APD_N(val) for val in APD_VALUES_OF_N}
 
 
