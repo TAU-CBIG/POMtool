@@ -468,11 +468,6 @@ class Rate_AP:
         scale = 1000
         return seconds_in_min/float(CL().calculate(window)/scale)
 
-APD_VALUES_OF_N = [60, 90]
-BIOMARKERS = {'MDP': MDP(),
-              'Max_Cai': Max_Cai(),
-              } | { str(APD_N(val)): APD_N(val) for val in APD_VALUES_OF_N}
-
 class RAPP_APD:
     def __init__(self) -> None:
         pass
@@ -536,6 +531,12 @@ class cellShortPerc:
         Cellshort = np.mean(cellshort)
         cellshortperc = 100*Cellshort/max_Lsarc
         return cellshortperc
+
+APD_VALUES_OF_N = [60, 90]
+BIOMARKERS = {'MDP': MDP(),
+              'Max_Cai': Max_Cai(),
+              'Min_Cai': Min_Cai(),
+              } | { str(APD_N(val)): APD_N(val) for val in APD_VALUES_OF_N}
 
 
 class Biomarkers:
