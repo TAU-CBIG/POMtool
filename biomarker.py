@@ -17,6 +17,16 @@ class Beat:
         self.data = {}
         self.bot_idx = 0
         self.top_idx = 0
+        self.mdp = []
+
+class Cai_Beat:
+    def __init__(self) -> None:
+        self.data = {}
+        self.bot_idx = 0
+        self.top_idx = 0
+        self.end_idx =0
+        self.start_idx=0
+        self.mcp = []
 
 class Window:
     def __init__(self, original_data: dict) -> None:
