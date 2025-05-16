@@ -368,6 +368,35 @@ class RTNPeak:
         return np.mean(rtpeak)
 
 
+class CAI_DURATION:
+    def __init__(self) -> None:
+        pass
+    def __str__(self) -> str:
+        return 'CAI_DURATION'
+
+    def required_data(self) -> list:
+        return [TIME, CALSIUM]
+    def calculate(self, window: Window) -> float:
+
+        duration = []
+        for i in range(window.beat_count-1):
+            beat = window.cai_beats[i]
+            next_beat = window.cai_beats[i+1]
+
+            start_index = beat.top_idx
+            end_index = len(beat.data[CALSIUM])
+            mcp = beat.mcp
+
+            cai = np.append(beat.data[CALSIUM], next_beat.data[CALSIUM][0])
+            t = np.append(beat.data[TIME], next_beat.data[TIME][0])
+
+            mcp_otherside = start_index + np.argwhere(cai[start_index:end_index] >= cai[mcp])[-1]
+            time = t[mcp_otherside] - t[mcp]
+            duration.append(time)
+
+        return np.mean(duration)
+
+
 class APD_N:
     '''action potential duration at N% repolarization'''
     def __init__(self, N: int) -> None:
