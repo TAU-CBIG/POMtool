@@ -397,6 +397,37 @@ class CAI_DURATION:
         return np.mean(duration)
 
 
+class CTDN:
+    def __init__(self, N: int) -> None:
+        self.N = N
+
+    def __str__(self) -> str:
+        return 'CTD' + str(self.N)
+
+    def required_data(self) -> list:
+        return [TIME, CALSIUM]
+
+    def calculate(self, window: Window) -> float:
+        ctdn = []
+        N_ = 1-self.N/100
+
+        for i in range(window.beat_count - 1): #n-1 first beats
+            beat = window.cai_beats[i]
+            next_beat = window.cai_beats[i + 1]
+
+            start_index = beat.mcp
+            end_index = len(beat.data[CALSIUM])
+
+            cai = np.append(beat.data[CALSIUM], next_beat.data[CALSIUM][0])
+            t = np.append(beat.data[TIME], next_beat.data[TIME][0])
+
+            height = np.argwhere(cai[start_index:end_index] >= cai[start_index] + N_*(np.max(cai[start_index:end_index] - cai[start_index])))
+            time = t[start_index+height[-1]] - t[start_index+height[0]]
+            ctdn.append(time)
+
+        return np.mean(ctdn)
+
+
 class APD_N:
     '''action potential duration at N% repolarization'''
     def __init__(self, N: int) -> None:
