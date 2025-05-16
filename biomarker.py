@@ -259,6 +259,24 @@ class APA:
         return max-MDP().calculate(window)
 
 
+class Peak:
+    def __init__(self) -> None:
+        pass
+
+    def __str__(self) -> str:
+        return 'Peak'
+
+    def required_data(self) -> list:
+        return [TIME, VM, STIM]
+
+    def calculate(self, window: Window) -> float:
+        ap_values = []
+        for beat in window.beats:
+            ap_values.append(np.max(beat.data[VM]))
+
+        return np.mean(ap_values)
+
+
 class APD_N:
     '''action potential duration at N% repolarization'''
     def __init__(self, N: int) -> None:
