@@ -277,6 +277,39 @@ class Peak:
         return np.mean(ap_values)
 
 
+class RTNM:
+    def __init__(self, N: int,  M: int) -> None:
+        self.N = N
+        self.M = M
+
+    def __str__(self) -> str:
+        return 'RT'+ str(self.N)+str(self.M)
+
+    def required_data(self) -> list:
+        return [TIME, CALSIUM]
+
+    def calculate(self, window: Window) -> float:
+        window.make_MCP()
+
+        N = self.N/100
+        M = self.M/100
+        risetime = []
+
+        for beat in window.cai_beats:
+            start_index = beat.mcp
+            end_index = beat.top_idx
+
+            cai = beat.data[CALSIUM]
+            time_window = beat.data[TIME]
+            height = cai[end_index] - cai[start_index]
+            JM = np.argwhere(cai[start_index:end_index] >= cai[start_index] + M * height)[0]
+            JN = np.argwhere(cai[start_index:end_index] <= cai[start_index] + N * height)[-1]
+            time = time_window[start_index + JM] - time_window[start_index + JN]
+            risetime.append(time)
+
+        return np.mean(risetime)
+
+
 class APD_N:
     '''action potential duration at N% repolarization'''
     def __init__(self, N: int) -> None:
