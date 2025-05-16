@@ -19,6 +19,7 @@ class Beat:
         self.data = {}
         self.bot_idx = 0
         self.top_idx = 0
+        self.biomarkers = {}
 
 class Cai_Beat:
     def __init__(self) -> None:
@@ -441,6 +442,7 @@ class APD_N:
             # Two values at given height, (start and end)
             at_height = np.argwhere(beat.data[VM] > value_height).ravel()
             all_values[i] = beat.data[TIME][at_height[-1]] - beat.data[TIME][at_height[0]]
+            beat.biomarkers[str(self)] = all_values[i]
             i += 1
             # Debug printing if you want to check what is actually happening
             # plt.plot(beat.data[TIME],beat.data[VM])
