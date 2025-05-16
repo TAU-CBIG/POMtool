@@ -41,7 +41,7 @@ class Window:
         self.is_stimulated = False # Detected if data is stimulated
         self._ap_beats = [] # views describing the beats based on Vm
         self._cai_beats = [] # views describing the beats based on Cai
-        self.beat_count = 4
+        self.beat_count = 9
 
     def ap_beats(self) -> list:
         if not self._ap_beats:
