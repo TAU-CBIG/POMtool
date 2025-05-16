@@ -139,6 +139,24 @@ class MDP:
             all_values[i] = window.beats[i].data[VM][0]
         return all_values.mean()
 
+class CL:
+    def __init__(self) -> None:
+        pass
+
+    def __str__(self) -> str:
+        return 'CL'
+
+    def required_data(self) -> list:
+        return [TIME, VM, STIM]
+
+    def calculate(self, window: Window) -> np.ndarray:
+        cl = []
+        for beat in window.beats:
+            cl.append(beat.data[TIME][beat.mdp])
+        cl = np.diff(cl)
+
+        return np.divide(np.sum(cl), len(cl))
+
 class APD_N:
     '''action potential duration at N% repolarization'''
     def __init__(self, N: int) -> None:
