@@ -163,6 +163,26 @@ class Min_Cai:
         return np.mean(min_cai)
 
 
+class Rate_Cai:
+    def __init__(self) -> None:
+        pass
+
+    def __str__(self) -> str:
+        return 'Rate_Cai'
+
+    def required_data(self) -> list:
+
+        return [TIME, VM, STIM, CALSIUM]  # makewin tarvii noi muutkin
+
+    def calculate(self, window: Window) -> float:
+
+        CLCa = []
+        for beat in window.cai_beats:
+            CLCa.append(beat.data[TIME][beat.top_idx])
+        CLCa = np.diff(CLCa)
+        Freq = np.divide(1000, CLCa)
+        return Freq.mean()
+
 class MDP:
     def __init__(self) -> None:
         pass
