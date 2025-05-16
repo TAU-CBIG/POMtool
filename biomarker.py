@@ -103,6 +103,25 @@ class Window:
             cai_beat.top_idx = int(np.argmax(cai_beat.data[CALSIUM]))
             self.cai_beats.append(cai_beat)
 
+    def make_MCP(self) ->None:
+        # Soglia (from matlab) = Minimiums with a condition -> mcp = minimium condition point
+
+        if self.is_mcp_calculated:
+            return
+        self.is_mcp_calculated = True
+        self.make_cai_peaks()
+        lag = 21
+
+        threshold = 1.2
+
+        for beat in self.cai_beats:
+            cai = beat.data[CALSIUM] #start ja end on bot indexejä
+            lag_values = cai[lag:]
+            now_values = cai[:-lag]
+
+            location = np.argwhere(lag_values > now_values*threshold)
+            beat.mcp = int(location[0])
+
 
 class MDP:
     def __init__(self) -> None:
