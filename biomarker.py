@@ -8,6 +8,7 @@ TIME = 'time'
 VM = 'Vm'
 CALSIUM = 'Cai'
 STIM = 'iStim'
+FORCE = "Force"
 
 CSV_SEPARATOR = ', '
 CSV_ENDLINE = '\n'
@@ -499,6 +500,27 @@ class RAPP_APD:
         apd80 = APD_N(80).calculate(window)
 
         return (apd30-apd40)/(apd70-apd80)
+
+class peakTension:
+    def __init__(self) -> None:
+        pass
+
+    def __str__(self) -> str:
+        return 'peakTension'
+
+    def required_data(self) -> list:
+        return [FORCE]
+
+    def calculate(self, window: Window) -> float:
+        maxtension = []
+        for beat in window.beats:
+            force = beat.data[FORCE]
+            locs, _ = scipy.signal.find_peaks(force)
+            values = force[locs]
+            maxtension = np.concatenate((maxtension, values))
+
+        return np.mean(maxtension)
+
 
 class Biomarkers:
     def __init__(self, args, patch_idx: int, patch_count: int) -> None:
