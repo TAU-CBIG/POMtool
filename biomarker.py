@@ -123,6 +123,27 @@ class Window:
             beat.mcp = int(location[0])
 
 
+class Min_Cai:
+    def __init__(self) -> None:
+        pass
+
+    def __str__(self) -> str:
+        return 'Min_Cai'
+
+    def required_data(self) -> list:
+
+        return [TIME, CALSIUM]
+
+    def calculate(self, window: Window) -> float:
+        min_cai = np.zeros(len(window.cai_beats))
+        i = 0
+        for beat in window.cai_beats:
+            min_cai[i] = np.min(beat.data[CALSIUM])
+            i += 1
+
+        return np.mean(min_cai)
+
+
 class MDP:
     def __init__(self) -> None:
         pass
