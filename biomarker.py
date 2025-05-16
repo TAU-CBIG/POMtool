@@ -309,6 +309,34 @@ class RTNM:
 
         return np.mean(risetime)
 
+class DTNM:
+    def __init__(self, N: int,  M: int) -> None:
+        self.N = N
+        self.M = M
+    def __str__(self) -> str:
+        return 'DT'+ str(self.N)+str(self.M)
+    def required_data(self) -> list:
+        return [TIME, CALSIUM]
+    def calculate(self, window: Window) -> float:
+        window.make_MCP()
+        N = self.N/100
+        M = self.M/100
+        dectime = []
+        for i in range(window.beat_count-1):
+            beat = window.cai_beats[i]
+            next_beat = window.cai_beats[i+1]
+            start_index = beat.top_idx
+            end_index = len(beat.data[CALSIUM])
+
+            cai = np.append(beat.data[CALSIUM], next_beat.data[CALSIUM][0])
+            t = np.append(beat.data[TIME], next_beat.data[TIME][0])
+
+            JN = np.argwhere(cai[start_index:end_index] <= cai[end_index] + N * cai[start_index])[0]
+            JM = np.argwhere(cai[start_index:end_index] >= cai[end_index] + M * cai[start_index])[-1]
+            time = t[start_index + JM] - t[start_index + JN]
+            dectime.append(time)
+
+        return np.mean(dectime)
 
 class APD_N:
     '''action potential duration at N% repolarization'''
