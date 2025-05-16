@@ -40,7 +40,10 @@ class Window:
         self.is_win_calculated = False # flag to set when win is calculated
         self.is_top_calculated = False # flag to set when top is calculated
         self.beats = [] # views describing the peaks
+        self.cai_beats = []
         self.beat_count = 4
+        self.is_cai_peaks_calculated = False
+        self.is_mcp_calculated = False
 
     def make_win(self) -> None:
         '''Makes window indexes based on the given data, call to make sure win exists'''
@@ -77,9 +80,28 @@ class Window:
             for beat in self.beats:
                 beat.bot_idx = np.nonzero(0 < np.diff(beat.data[STIM]))[0]
                 beat.top_idx, _ = scipy.signal.find_peaks(beat.data[VM])
-                print(beat.bot_idx, beat.top_idx)
         else:
             raise ValueError('Only implemented for stimulated')
+
+    def make_cai_peaks(self) -> None:
+        if self.is_cai_peaks_calculated:
+            return
+        self.is_cai_peaks_calculated = True
+        self.make_win()
+
+        bot_cai_all, _ = scipy.signal.find_peaks(-self.data[CALSIUM])
+
+        for i in range(0, self.beat_count):
+
+            start_idx = bot_cai_all[-1- self.beat_count + i]
+            end_idx = bot_cai_all[-1- self.beat_count + i + 1]
+
+            cai_beat = Beat()
+            for key in self.data:
+                # Make view of each data name per beat
+                cai_beat.data[key] = self.data[key][start_idx:end_idx]
+            cai_beat.top_idx = int(np.argmax(cai_beat.data[CALSIUM]))
+            self.cai_beats.append(cai_beat)
 
 
 class MDP:
