@@ -538,6 +538,7 @@ BIOMARKERS = {'MDP': MDP(),
               'Min_Cai': Min_Cai(),
               'Rate_Cai': Rate_Cai(),
               'CL': CL(),
+              'dv_dt_max': dv_dt_max(),
               } | { str(APD_N(val)): APD_N(val) for val in APD_VALUES_OF_N}
 
 
