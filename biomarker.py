@@ -239,6 +239,26 @@ class dv_dt_max:
         dv_dt_max = np.divide(np.sum(dv_dt), len(dv_dt))
         return dv_dt_max
 
+
+class APA:
+    def __init__(self) -> None:
+        pass
+
+    def __str__(self) -> str:
+        return 'APA'
+
+    def required_data(self) -> list:
+        return [TIME, VM, STIM]
+
+    def calculate(self, window: Window) -> float:
+        max = -np.inf
+        for beat in window.beats:
+            beat_max = np.max(beat.data[VM])
+            if beat_max > max:
+                max = beat_max
+        return max-MDP().calculate(window)
+
+
 class APD_N:
     '''action potential duration at N% repolarization'''
     def __init__(self, N: int) -> None:
