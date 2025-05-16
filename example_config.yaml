@@ -61,6 +61,7 @@ biomarkers:
 - biomarker: "RT1090"
 - biomarker: "DT9010"
 - biomarker: "RT10Peak"
+- biomarker: "CAI_DURATION"
 
 # Contains list of calibrations that should be run
 calibration:
