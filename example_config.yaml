@@ -55,7 +55,7 @@ biomarkers:
 - biomarker: "Min_Cai"
 - biomarker: "Rate_Cai"
 - biomarker: "CL"
-- biomarker: "dv_dt_max"
+- biomarker: "APA"
 
 # Contains list of calibrations that should be run
 calibration:
