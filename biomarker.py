@@ -28,7 +28,7 @@ class Cai_Beat:
         self.top_idx = 0
         self.end_idx =0
         self.start_idx=0
-        self.mcp = []
+        self.mcp_idx = 0
 
 class Window:
     def __init__(self, original_data: dict) -> None:
@@ -39,61 +39,53 @@ class Window:
         self.mdp_all = None # All minimum action potentials, ie valleys
         self.mdp = np.ndarray([]) # Minimum action potentials, ie valleys
         self.is_stimulated = False # Detected if data is stimulated
-        self.is_win_calculated = False # flag to set when win is calculated
-        self.is_top_calculated = False # flag to set when top is calculated
-        self.beats = [] # views describing the peaks
-        self.cai_beats = []
+        self._ap_beats = [] # views describing the beats based on Vm
+        self._cai_beats = [] # views describing the beats based on Cai
         self.beat_count = 4
-        self.is_cai_peaks_calculated = False
-        self.is_mcp_calculated = False
 
-    def make_win(self) -> None:
-        '''Makes window indexes based on the given data, call to make sure win exists'''
-        if self.is_win_calculated:
-            return
-        self.is_win_calculated = True
+    def ap_beats(self) -> list:
+        if not self._ap_beats:
+            self._make_win_ap_beats()
+        return self._ap_beats
 
+    def cai_beats(self) -> list:
+        if not self._cai_beats:
+            self._make_cai_beats()
+        return self._cai_beats
+
+    def _make_win_ap_beats(self) -> None:
         # TODO add some minimum distance for the peaks (or valleys) so we don't get something weird, should depend on dt
         # TODO using 0 for threshold, which is arbitrary, should prob use something more meaningful
         self.mdp_all, _ = scipy.signal.find_peaks(-self.data[VM], threshold=0.0)
 
         # find beats defined from bottom-to-bottom, amount described in beat_count, detected from Vm
-        for i in range(0, self.beat_count):
+        for i in range(self.beat_count):
             start_idx = self.mdp_all[-1-self.beat_count + i]
             end_idx = self.mdp_all[-1-self.beat_count + i + 1]
             beat = Beat()
             for key in self.data:
                 # Make view of each data name per beat
                 beat.data[key] = self.data[key][start_idx:end_idx]
-            self.beats.append(beat)
+            self._ap_beats.append(beat)
 
         if STIM in self.data:
             if 1 < len(np.unique(self.data[STIM])):
                 self.is_stimulated = True
+        self._make_ap_top()
 
 
-    def make_top(self) -> None:
-        if self.is_top_calculated:
-            return
-        self.is_top_calculated = True
-        self.make_win()
-
+    def _make_ap_top(self) -> None:
         if self.is_stimulated:
-            for beat in self.beats:
+            for beat in self._ap_beats:
                 beat.bot_idx = np.nonzero(0 < np.diff(beat.data[STIM]))[0]
                 beat.top_idx, _ = scipy.signal.find_peaks(beat.data[VM])
         else:
             raise ValueError('Only implemented for stimulated')
 
-    def make_cai_peaks(self) -> None:
-        if self.is_cai_peaks_calculated:
-            return
-        self.is_cai_peaks_calculated = True
-        self.make_win()
-
+    def _make_cai_beats(self) -> None:
         bot_cai_all, _ = scipy.signal.find_peaks(-self.data[CALSIUM])
 
-        for i in range(0, self.beat_count):
+        for i in range(self.beat_count):
 
             start_idx = bot_cai_all[-1- self.beat_count + i]
             end_idx = bot_cai_all[-1- self.beat_count + i + 1]
@@ -103,26 +95,22 @@ class Window:
                 # Make view of each data name per beat
                 cai_beat.data[key] = self.data[key][start_idx:end_idx]
             cai_beat.top_idx = int(np.argmax(cai_beat.data[CALSIUM]))
-            self.cai_beats.append(cai_beat)
+            self._cai_beats.append(cai_beat)
+        self._make_MCP()
 
-    def make_MCP(self) ->None:
+    def _make_MCP(self) ->None:
         # Soglia (from matlab) = Minimiums with a condition -> mcp = minimium condition point
-
-        if self.is_mcp_calculated:
-            return
-        self.is_mcp_calculated = True
-        self.make_cai_peaks()
         lag = 21
 
         threshold = 1.2
 
-        for beat in self.cai_beats:
+        for beat in self.cai_beats():
             cai = beat.data[CALSIUM] #start ja end on bot indexejä
             lag_values = cai[lag:]
             now_values = cai[:-lag]
 
             location = np.argwhere(lag_values > now_values*threshold)
-            beat.mcp = int(location[0])
+            beat.mcp_idx = int(location[0])
 
 
 class Max_Cai:
@@ -136,10 +124,9 @@ class Max_Cai:
         return [TIME, CALSIUM]
 
     def calculate(self, window: Window) -> float:
-        window.make_cai_peaks()
-        max_cai = np.zeros(len(window.cai_beats))
+        max_cai = np.zeros(window.beat_count)
         i = 0
-        for beat in window.cai_beats:
+        for beat in window.cai_beats():
             max_cai[i] = np.max(beat.data[CALSIUM])
             i += 1
         return np.mean(max_cai)
@@ -157,9 +144,9 @@ class Min_Cai:
         return [TIME, CALSIUM]
 
     def calculate(self, window: Window) -> float:
-        min_cai = np.zeros(len(window.cai_beats))
+        min_cai = np.zeros(window.beat_count)
         i = 0
-        for beat in window.cai_beats:
+        for beat in window.cai_beats():
             min_cai[i] = np.min(beat.data[CALSIUM])
             i += 1
 
@@ -180,7 +167,7 @@ class Rate_Cai:
     def calculate(self, window: Window) -> float:
 
         CLCa = []
-        for beat in window.cai_beats:
+        for beat in window.cai_beats():
             CLCa.append(beat.data[TIME][beat.top_idx])
         CLCa = np.diff(CLCa)
         Freq = np.divide(1000, CLCa)
@@ -197,9 +184,9 @@ class MDP:
         return [TIME, VM, STIM]
 
     def calculate(self, window: Window) -> float:
-        all_values = np.zeros(len(window.beats))
+        all_values = np.zeros(window.beat_count)
         for i in range(window.beat_count):
-            all_values[i] = window.beats[i].data[VM][0]
+            all_values[i] = window.ap_beats()[i].data[VM][0]
         return all_values.mean()
 
 class CL:
@@ -214,7 +201,7 @@ class CL:
 
     def calculate(self, window: Window) -> np.ndarray:
         cl = []
-        for beat in window.beats:
+        for beat in window.ap_beats():
             cl.append(beat.data[TIME][beat.mdp])
         cl = np.diff(cl)
 
@@ -232,7 +219,7 @@ class dv_dt_max:
 
     def calculate(self, window: Window) -> float:
         dVM = []
-        for beat in window.beats:
+        for beat in window.ap_beats():
             value = np.divide(np.diff(beat.data[VM]), np.diff(beat.data[TIME]))
             dVM= np.concatenate((dVM, value))
 
@@ -255,7 +242,7 @@ class APA:
 
     def calculate(self, window: Window) -> float:
         max = -np.inf
-        for beat in window.beats:
+        for beat in window.ap_beats():
             beat_max = np.max(beat.data[VM])
             if beat_max > max:
                 max = beat_max
@@ -274,7 +261,7 @@ class Peak:
 
     def calculate(self, window: Window) -> float:
         ap_values = []
-        for beat in window.beats:
+        for beat in window.ap_beats():
             ap_values.append(np.max(beat.data[VM]))
 
         return np.mean(ap_values)
@@ -292,14 +279,12 @@ class RTNM:
         return [TIME, CALSIUM]
 
     def calculate(self, window: Window) -> float:
-        window.make_MCP()
-
         N = self.N/100
         M = self.M/100
         risetime = []
 
-        for beat in window.cai_beats:
-            start_index = beat.mcp
+        for beat in window.cai_beats():
+            start_index = beat.mcp_idx
             end_index = beat.top_idx
 
             cai = beat.data[CALSIUM]
@@ -321,13 +306,13 @@ class DTNM:
     def required_data(self) -> list:
         return [TIME, CALSIUM]
     def calculate(self, window: Window) -> float:
-        window.make_MCP()
         N = self.N/100
         M = self.M/100
         dectime = []
+        cai_beats = window.cai_beats()
         for i in range(window.beat_count-1):
-            beat = window.cai_beats[i]
-            next_beat = window.cai_beats[i+1]
+            beat = cai_beats[i]
+            next_beat = cai_beats[i+1]
             start_index = beat.top_idx
             end_index = len(beat.data[CALSIUM])
 
@@ -352,12 +337,11 @@ class RTNPeak:
         return [TIME, CALSIUM]
 
     def calculate(self, window: Window) -> float:
-        window.make_MCP()
         N = self.N / 100
         rtpeak = []
 
-        for beat in window.cai_beats:
-            start_index = beat.mcp
+        for beat in window.cai_beats():
+            start_index = beat.mcp_idx
             end_index = beat.top_idx
 
             cai = beat.data[CALSIUM]
@@ -381,14 +365,15 @@ class CAI_DURATION:
         return [TIME, CALSIUM]
     def calculate(self, window: Window) -> float:
 
+        cai_beats = window.cai_beats()
         duration = []
         for i in range(window.beat_count-1):
-            beat = window.cai_beats[i]
-            next_beat = window.cai_beats[i+1]
+            beat = cai_beats[i]
+            next_beat = cai_beats[i+1]
 
             start_index = beat.top_idx
             end_index = len(beat.data[CALSIUM])
-            mcp = beat.mcp
+            mcp = beat.mcp_idx
 
             cai = np.append(beat.data[CALSIUM], next_beat.data[CALSIUM][0])
             t = np.append(beat.data[TIME], next_beat.data[TIME][0])
@@ -413,12 +398,13 @@ class CTDN:
     def calculate(self, window: Window) -> float:
         ctdn = []
         N_ = 1-self.N/100
+        cai_beats = window.cai_beats()
 
         for i in range(window.beat_count - 1): #n-1 first beats
-            beat = window.cai_beats[i]
-            next_beat = window.cai_beats[i + 1]
+            beat = cai_beats[i]
+            next_beat = cai_beats[i + 1]
 
-            start_index = beat.mcp
+            start_index = beat.mcp_idx
             end_index = len(beat.data[CALSIUM])
 
             cai = np.append(beat.data[CALSIUM], next_beat.data[CALSIUM][0])
@@ -443,11 +429,10 @@ class APD_N:
         return [TIME, VM, STIM]
 
     def calculate(self, window: Window) -> float:
-        window.make_top()
-        all_values = np.zeros(len(window.beats))
+        all_values = np.zeros(window.beat_count)
         i = 0
         beat: Beat
-        for beat in window.beats:
+        for beat in window.ap_beats():
             top = beat.data[VM][beat.top_idx]
             bot = beat.data[VM][beat.bot_idx]
 
@@ -466,6 +451,8 @@ class APD_N:
             # plt.show()
 
         return all_values.mean()
+
+
 class Rate_AP:
     def __init__(self) -> None:
         pass
@@ -516,7 +503,7 @@ class peakTension:
 
     def calculate(self, window: Window) -> float:
         maxtension = []
-        for beat in window.beats:
+        for beat in window.ap_beats():
             force = beat.data[FORCE]
             locs, _ = scipy.signal.find_peaks(force)
             values = force[locs]
@@ -532,12 +519,12 @@ class cellShortPerc:
         return 'cellShortPerc'
 
     def required_data(self) -> list:
-        return [LSARC]
+        return [TIME, VM, LSARC]
 
     def calculate(self, window: Window) -> float:
         cellshort = []
         max_Lsarc = -np.inf
-        for beat in window.beats:
+        for beat in window.ap_beats():
             Lsarc = beat.data[LSARC]
             locs, _ = scipy.signal.find_peaks(-Lsarc)
             values = Lsarc[locs]
@@ -594,7 +581,6 @@ class Biomarkers:
         for idx in experiment.patch:
             # get data through the experiment needed for the biomarkers
             data = Window(experiment.get_data(names, idx))
-            data.make_top()
             results = ['nan'] * len(self.biomarkers)
             for i in range(len(self.biomarkers)):
                 try:
