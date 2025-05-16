@@ -531,6 +531,75 @@ class cellShortPerc:
         Cellshort = np.mean(cellshort)
         cellshortperc = 100*Cellshort/max_Lsarc
         return cellshortperc
+class relaxTime50:
+    def __init__(self) -> None:
+        pass
+    def __str__(self) -> str:
+        return 'relaxTime'
+
+    def required_data(self) -> list:
+        return [TIME, VM, STIM, LSARC, FORCE]
+
+    def calculate(self, window: Window) -> float:
+        relaxTime50Buf = np.zeros(window.beat_count-1)
+        i = 0
+
+        stepTol = 0.5e-4
+        maxTol = 5e-4
+        minTol = 1e-4
+
+
+        for beat_idx in range(window.beat_count-1):
+
+
+            beat = window.ap_beats()[beat_idx]
+            next_beat = window.ap_beats()[beat_idx+1]
+            t = np.concatenate((beat.data[TIME], next_beat.data[TIME]))
+            frc = np.concatenate((beat.data[FORCE], next_beat.data[FORCE]))
+            top = beat.top_idx
+
+            next_top = next_beat.top_idx+len(beat.data[TIME])-1
+
+            top = top[0]
+            next_top = next_top[0]
+
+
+            relaxTime50Buf[i] = self.computeContrRT50(t, t[top], t[next_top], frc, minTol, maxTol, stepTol, top, next_top)
+
+
+            i += 1
+        return np.mean(relaxTime50Buf)
+
+    def computeContrRT50(self, t, tStartRT50, tStopRT50, Frc, min, max, step) -> float:
+        min_tol = min
+        max_tol = max
+        step_tol = step
+
+        tt = np.argwhere((tStartRT50 <= t) & (t <= tStopRT50))
+        ts = tt[0][0]
+        te = tt[-1][0]
+        tlc = t[ts:te]
+        frct = Frc[ts:te]
+        pkt = np.max(frct)
+        ppp = np.argmax(frct)
+        pkt_time = tlc[ppp]
+
+        count = 0
+
+        rel50 = []
+        while min_tol <= max_tol:
+            min_tol = min_tol + step_tol*count
+            rel50 = np.argwhere(np.abs(frct[ppp:]-0.5*pkt)<=min_tol)
+            if len(rel50) >= 1:
+                rel50 = rel50[0]
+                break
+            count +=1
+        halfreltime = tlc[ppp + rel50]
+        RT50 = (halfreltime - pkt_time) * 1000
+
+
+
+        return RT50
 
 BIOMARKERS = {'MDP': MDP(),
               'Max_Cai': Max_Cai(),
@@ -561,6 +630,7 @@ BIOMARKERS = {'MDP': MDP(),
               'APD70': APD_N(70),
               'APD80': APD_N(80),
               'APD90': APD_N(90),
+              "relaxTime50": relaxTime50(50)
               }
 
 
