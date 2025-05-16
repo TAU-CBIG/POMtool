@@ -65,6 +65,7 @@ biomarkers:
 - biomarker: "CTD30"
 - biomarker: "CTD50"
 - biomarker: "CTD90"
+- biomarker: "Rate_AP"
 
 # Contains list of calibrations that should be run
 calibration:
