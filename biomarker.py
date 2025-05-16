@@ -136,6 +136,7 @@ class Max_Cai:
         return [TIME, CALSIUM]
 
     def calculate(self, window: Window) -> float:
+        window.make_cai_peaks()
         max_cai = np.zeros(len(window.cai_beats))
         i = 0
         for beat in window.cai_beats:
@@ -481,7 +482,8 @@ class Rate_AP:
         return seconds_in_min/float(CL().calculate(window)/scale)
 
 APD_VALUES_OF_N = [60, 90]
-BIOMARKERS = {'MDP': MDP()
+BIOMARKERS = {'MDP': MDP(),
+              'Max_Cai': Max_Cai(),
               } | { str(APD_N(val)): APD_N(val) for val in APD_VALUES_OF_N}
 
 class RAPP_APD:
