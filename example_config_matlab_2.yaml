@@ -3,7 +3,7 @@ model:
 - id: "my_matlab_model"
   exec: "matlab"
   param_key: "%#"
-  base_directory: "C:/Users/oylin/Documents/The hiMCES model/hiMCES model clean codes 2"
+  base_directory: "_matlab_model"
 - par: -batch "funz_main_hiMCES(%1,%2, %3, %4, %5)"
 - val: "time"
   method: "matlab"
@@ -27,7 +27,7 @@ model:
 experiment:
 - name: "mylatin_#" # '#' is to be replaced with id-number
   id: "mylatin"
-  cwd: "C:/Users/oylin/Documents/population_calibration/_example"
+  cwd: "_example_matlab"
   model: "my_matlab_model"
   parametrization: "latin_hybercube"
   cells: 1
