@@ -570,11 +570,7 @@ class relaxTime50:
 
             next_top = next_beat.top_idx+len(beat.data[TIME])-1
 
-            top = top[0]
-            next_top = next_top[0]
-
-
-            relaxTime50Buf[i] = self.computeContrRT50(t, t[top], t[next_top], frc, minTol, maxTol, stepTol, top, next_top)
+            relaxTime50Buf[i] = self.computeContrRT50(t, t[top], t[next_top], frc, minTol, maxTol, stepTol)
 
 
             i += 1
@@ -640,7 +636,7 @@ BIOMARKERS = {'MDP': MDP(),
               'APD70': APD_N(70),
               'APD80': APD_N(80),
               'APD90': APD_N(90),
-              "relaxTime50": relaxTime50(50)
+              "relaxTime50": relaxTime50()
               }
 
 
