@@ -56,12 +56,16 @@ class Window:
     def _make_win_ap_beats(self) -> None:
         # TODO add some minimum distance for the peaks (or valleys) so we don't get something weird, should depend on dt
         # TODO using 0 for threshold, which is arbitrary, should prob use something more meaningful
-        self.mdp_all, _ = scipy.signal.find_peaks(-self.data[VM], threshold=0.0)
+        threshold = 0.0
+        mdp, _ = scipy.signal.find_peaks(-self.data[VM])
+        temp = np.argwhere(self.data[VM][mdp] < threshold)
+        indexes = mdp[temp]
+        self.mdp_all = indexes
 
         # find beats defined from bottom-to-bottom, amount described in beat_count, detected from Vm
         for i in range(self.beat_count):
-            start_idx = self.mdp_all[-1-self.beat_count + i]
-            end_idx = self.mdp_all[-1-self.beat_count + i + 1]
+            start_idx = self.mdp_all[-1-self.beat_count + i][0]
+            end_idx = self.mdp_all[-1-self.beat_count + i + 1][0]
             beat = Beat()
             for key in self.data:
                 # Make view of each data name per beat
@@ -78,7 +82,8 @@ class Window:
         if self.is_stimulated:
             for beat in self._ap_beats:
                 beat.bot_idx = np.nonzero(0 < np.diff(beat.data[STIM]))[0]
-                beat.top_idx, _ = scipy.signal.find_peaks(beat.data[VM])
+                beat.top_idx, _ = scipy.signal.find_peaks(beat.data[VM])[0]
+
         else:
             raise ValueError('Only implemented for stimulated')
 
@@ -483,8 +488,8 @@ class RAPP_APD:
         values = []
         def get_ap(win: Window, N: int):
             name = str(APD_N(N))
-            if str(name) in beat.biomarker:
-                return beat.biomarker[name]
+            if str(name) in beat.biomarkers:
+                return beat.biomarkers[name]
             else:
                 return APD_N(N).calculate(win)
         for beat in window.ap_beats():
