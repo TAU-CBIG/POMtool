@@ -137,7 +137,7 @@ class Max_Cai:
         return np.mean(max_cai)
 
 
-class Min_Cai:
+class Min_Cai: #unit: mol
     def __init__(self) -> None:
         pass
 
@@ -158,7 +158,7 @@ class Min_Cai:
         return np.mean(min_cai)
 
 
-class Rate_Cai:
+class Rate_Cai: #Unit Hz
     def __init__(self) -> None:
         pass
 
@@ -212,27 +212,23 @@ class CL:
 
         return np.divide(np.sum(cl), len(cl))
 
-class dv_dt_max:
+class dv_dt_max: #unit: V/s
     def __init__(self) -> None:
         pass
 
     def __str__(self) -> str:
-        return 'dV_dt_max'
+        return 'dv_dt_max'
 
     def required_data(self) -> list:
         return [TIME, VM, STIM]
 
     def calculate(self, window: Window) -> float:
-        dVM = []
+        dV_dt = []
         for beat in window.ap_beats():
             value = np.divide(np.diff(beat.data[VM]), np.diff(beat.data[TIME]))
-            dVM= np.concatenate((dVM, value))
+            dV_dt.append(np.max(value))
 
-        min_distance = APD_N(90).calculate(window)*1000 #s to ms
-        Locations_of_peaks, _ = scipy.signal.find_peaks(dVM,distance=min_distance)
-        dv_dt = dVM[Locations_of_peaks]
-        dv_dt_max = np.divide(np.sum(dv_dt), len(dv_dt))
-        return dv_dt_max
+        return np.mean(dV_dt)
 
 
 class APA:
@@ -254,7 +250,7 @@ class APA:
         return max-MDP().calculate(window)
 
 
-class Peak:
+class Peak: #Unit: V
     def __init__(self) -> None:
         pass
 
@@ -272,7 +268,7 @@ class Peak:
         return np.mean(ap_values)
 
 
-class RTNM:
+class RTNM: #unit: S
     def __init__(self, N: int,  M: int) -> None:
         self.N = N
         self.M = M
@@ -302,7 +298,7 @@ class RTNM:
 
         return np.mean(risetime)
 
-class DTNM:
+class DTNM: #unit: S
     def __init__(self, N: int,  M: int) -> None:
         self.N = N
         self.M = M
@@ -331,7 +327,7 @@ class DTNM:
 
         return np.mean(dectime)
 
-class RTNPeak:
+class RTNPeak: #unit: S
     def __init__(self, N: int) -> None:
         self.N = N
 
@@ -360,7 +356,7 @@ class RTNPeak:
         return np.mean(rtpeak)
 
 
-class CAI_DURATION:
+class CAI_DURATION: #unit: S
     def __init__(self) -> None:
         pass
     def __str__(self) -> str:
@@ -390,7 +386,7 @@ class CAI_DURATION:
         return np.mean(duration)
 
 
-class CTDN:
+class CTDN: #unit: S
     def __init__(self, N: int) -> None:
         self.N = N
 
@@ -422,7 +418,7 @@ class CTDN:
         return np.mean(ctdn)
 
 
-class APD_N:
+class APD_N: #unit: S
     '''action potential duration at N% repolarization'''
     def __init__(self, N: int) -> None:
         self.N = N
@@ -459,7 +455,7 @@ class APD_N:
         return all_values.mean()
 
 
-class Rate_AP:
+class Rate_AP: #unit: beats per (minute/X)
     def __init__(self) -> None:
         pass
 
@@ -474,7 +470,7 @@ class Rate_AP:
         scale = 1000
         return seconds_in_min/float(CL().calculate(window)/scale)
 
-class RAPP_APD:
+class RAPP_APD: #unit: None
     def __init__(self) -> None:
         pass
 
@@ -501,7 +497,7 @@ class RAPP_APD:
 
         return np.mean(values)
 
-class peakTension:
+class peakTension: #unit: N/m^2
     def __init__(self) -> None:
         pass
 
@@ -521,7 +517,7 @@ class peakTension:
 
         return np.mean(maxtension)
 
-class cellShortPerc:
+class cellShortPerc: #unit: None
     def __init__(self) -> None:
         pass
 
@@ -546,11 +542,11 @@ class cellShortPerc:
         Cellshort = np.mean(cellshort)
         cellshortperc = 100*Cellshort/max_Lsarc
         return cellshortperc
-class relaxTime50:
+class relaxTime50: #unit: S
     def __init__(self) -> None:
         pass
     def __str__(self) -> str:
-        return 'relaxTime'
+        return 'relaxTime50'
 
     def required_data(self) -> list:
         return [TIME, VM, STIM, LSARC, FORCE]
