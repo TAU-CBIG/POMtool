@@ -602,7 +602,7 @@ class relaxTime50: #unit: S
                 break
             count +=1
         halfreltime = tlc[ppp + rel50]
-        RT50 = (halfreltime - pkt_time) * 1000
+        RT50 = (halfreltime - pkt_time)
 
 
 
