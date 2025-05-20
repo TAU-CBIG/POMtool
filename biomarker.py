@@ -55,12 +55,8 @@ class Window:
 
     def _make_win_ap_beats(self) -> None:
         # TODO add some minimum distance for the peaks (or valleys) so we don't get something weird, should depend on dt
-        # TODO using 0 for threshold, which is arbitrary, should prob use something more meaningful
-        threshold = 0.0
-        mdp, _ = scipy.signal.find_peaks(-self.data[VM])
-        temp = np.argwhere(self.data[VM][mdp] < threshold)
-        indexes = mdp[temp]
-        self.mdp_all = indexes
+        # TODO using 0 for threshold(ie height limit), which is arbitrary, should prob use something more meaningful
+        self.mdp_all, _ = scipy.signal.find_peaks(-self.data[VM], height=0.0)
 
         # find beats defined from bottom-to-bottom, amount described in beat_count, detected from Vm
         for i in range(self.beat_count):
