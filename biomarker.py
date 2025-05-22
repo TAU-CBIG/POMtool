@@ -78,7 +78,11 @@ class Window:
         if self.is_stimulated:
             for beat in self._ap_beats:
                 beat.bot_idx = np.nonzero(0 < np.diff(beat.data[STIM]))[0]
-                beat.top_idx, _ = scipy.signal.find_peaks(beat.data[VM])[0]
+                top_idx, _ = scipy.signal.find_peaks(beat.data[VM])
+                try:
+                    beat.top_idx = top_idx[0]
+                except:
+                    beat.top_idx = top_idx
 
         else:
             raise ValueError('Only implemented for stimulated')
