@@ -96,7 +96,7 @@ class Model:
                 item_id = value_data["id"]
                 if filename not in mat_files:
                     mat_files[filename] = scipy.io.loadmat(f'{directory}/{value_data["file"]}')
-                ret_data[item_id] = mat_files[filename][item_id].flatten()
+                ret_data[name] = mat_files[filename][item_id].flatten()
             else:
                 raise ValueError(f'undefined method to read the data')
         return ret_data
