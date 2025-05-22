@@ -16,15 +16,19 @@ model:
 - par: "--read-ini-file=initial.sv"
 - par: "--imp-par i_stim_on=1,ADP_TUNE=%1,Pi_ref_TUNE=%2,ap2_TUNE=%3,F1_TUNE=%4,F2_TUNE=%5"
 - val: "time"
+  unit: 'ms'
   method: "binary"
   file: "job_data_amin2024.t.bin"
 - val: "Vm"
+  unit: 'mV'
   method: "binary"
   file: "job_data_amin2024.Vm.bin"
 - val: "Cai"
+  unit: 'mmol'
   method: "binary"
   file: "job_data_amin2024__amin2024.Cai.bin"
 - val: "iStim"
+  unit: 'mV'
   method: "openCARP_trace"
   file: "Trace_0.dat"
   header_file: "_amin2024_trace_header.txt"

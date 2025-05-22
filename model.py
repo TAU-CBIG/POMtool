@@ -3,6 +3,7 @@ import os
 import shutil
 import subprocess
 import scipy.io
+import utility
 
 class Model:
     def __init__(self, full_args) -> None:
@@ -99,6 +100,13 @@ class Model:
                 ret_data[name] = mat_files[filename][item_id].flatten()
             else:
                 raise ValueError(f'undefined method to read the data')
+            if 'unit' in value_data.keys():
+                unit= value_data["unit"]
+                if unit not in utility.unit_to_scimath.keys():
+                    raise KeyError(f"Input '{name}' has unit '{unit}' that we do not support. We support the following units: {list(utility.unit_to_scimath.keys())}" )
+            else:
+                raise ValueError(f"Unit of `{name}` not defined. We support the following units: {list(utility.unit_to_scimath.keys())}")
+            ret_data[name] = utility.convert_to_default(ret_data[name], value_data["unit"])
         return ret_data
 
 class Models:
