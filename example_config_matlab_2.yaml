@@ -25,6 +25,16 @@ model:
   method: "matlab"
   file: "job_data_amin2024.mat"
   id: "Cai"
+- val: "Force"
+  unit: "mN/mm2"
+  method: "matlab"
+  file: "job_data_amin2024.mat"
+  id: "AT"
+- val: "Lsarc"
+  unit: "mol"
+  method: "matlab"
+  file: "job_data_amin2024.mat"
+  id: "Lsarc"
 
 
 # how model should be run and with what parameters
