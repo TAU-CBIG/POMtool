@@ -750,9 +750,8 @@ class Biomarkers:
                 if unit == "default":
                     unit = utility.default_option[type]
                     self.biomarker_units[str(self.biomarkers[i])] = unit
+                    header[i] = unit
                 results[i] = str(utility.convert_from_default(value, unit))
-               # except:
-                   # results[i] = 'nan'
 
             # Remove following comments to print out biomarkers for each cell
             #for bm, result in zip(self.biomarkers, results):
