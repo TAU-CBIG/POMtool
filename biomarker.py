@@ -78,14 +78,32 @@ class Window:
         if self.is_stimulated:
             for beat in self._ap_beats:
                 beat.bot_idx = np.nonzero(0 < np.diff(beat.data[STIM]))[0]
-                top_idx, _ = scipy.signal.find_peaks(beat.data[VM])
-                try:
-                    beat.top_idx = top_idx[0]
-                except:
-                    beat.top_idx = top_idx
-
         else:
-            raise ValueError('Only implemented for stimulated')
+            for beat in self._ap_beats:
+                Vm = beat.data[VM]
+                t = beat.data[TIME]
+                #In matlab code threshold was µV
+                threshold = utility.convert_to_default(-10,"uV")
+
+                DDendind = np.min(np.argwhere(Vm > threshold))
+
+                DDendtime = t[DDendind]
+                fit_window_ind = round(2*(DDendind+1)/3)
+
+                poly = np.polyfit(t[:fit_window_ind], Vm[:fit_window_ind], 1)
+                BOT = poly[0]*DDendtime+poly[1]
+                idxPertBOT = np.argwhere(t < DDendtime)
+                Vm_shorter = Vm[idxPertBOT]
+                idxBOT = np.max(np.argwhere(Vm_shorter <= BOT))
+                beat.bot_idx = idxBOT
+
+        for beat in self._ap_beats:
+            top_idx, _ = scipy.signal.find_peaks(beat.data[VM])
+            try:
+                beat.top_idx = top_idx[0]
+            except:
+                beat.top_idx = top_idx
+
 
     def _make_cai_beats(self) -> None:
         bot_cai_all, _ = scipy.signal.find_peaks(-self.data[CALSIUM])
@@ -456,7 +474,6 @@ class APD_N: #unit: S
         return [TIME, VM, STIM]
     def return_type(self) -> str:
         return utility.TIME
-
 
     def calculate(self, window: Window) -> float:
         all_values = np.zeros(window.beat_count)
