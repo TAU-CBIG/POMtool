@@ -238,7 +238,7 @@ class CL:
             cl.append(beat.data[TIME][0])
         cl = np.diff(cl)
 
-        return np.divide(np.sum(cl), len(cl))
+        return np.mean(cl)
 
 class dv_dt_max: #unit: V/s
     def __init__(self) -> None:
