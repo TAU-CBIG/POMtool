@@ -60,8 +60,8 @@ class Window:
 
         # find beats defined from bottom-to-bottom, amount described in beat_count, detected from Vm
         for i in range(self.beat_count):
-            start_idx = self.mdp_all[-1-self.beat_count + i][0]
-            end_idx = self.mdp_all[-1-self.beat_count + i + 1][0]
+            start_idx = self.mdp_all[-1-self.beat_count + i]
+            end_idx = self.mdp_all[-1-self.beat_count + i + 1]
             beat = Beat()
             for key in self.data:
                 # Make view of each data name per beat
