@@ -123,7 +123,7 @@ class Window:
 
     def _make_MCP(self) ->None:
         # Soglia (from matlab) = Minimiums with a condition -> mcp = minimium condition point
-        lag = 21
+        lag = 20
 
         threshold = 1.2
 
@@ -132,7 +132,7 @@ class Window:
             lag_values = cai[lag:]
             now_values = cai[:-lag]
 
-            location = np.argwhere(lag_values > now_values*threshold)
+            location = np.argwhere(lag_values >= now_values*threshold)
             beat.mcp_idx = int(location[0])
 
 
@@ -497,6 +497,7 @@ class APD_N: #unit: S
             # plt.plot(beat.data[TIME][beat.top_idx], beat.data[VM][beat.top_idx], 'o')
             # plt.plot(beat.data[TIME][[at_height[1], at_height[-1]]], [value_height, value_height])
             # plt.show()
+            #In matlab it takes maximium peak and we take first peak
 
         return all_values.mean()
 
