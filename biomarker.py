@@ -177,7 +177,7 @@ class Rate_Cai: #Unit Hz
         for beat in window.cai_beats():
             CLCa.append(beat.data[TIME][beat.top_idx])
         CLCa = np.diff(CLCa)
-        Freq = np.divide(1000, CLCa)
+        Freq = 1/CLCa
         return Freq.mean()
 
 class MDP:
@@ -210,7 +210,7 @@ class CL:
     def return_type(self) -> str:
         return utility.TIME
 
-    def calculate(self, window: Window) -> np.ndarray:
+    def calculate(self, window: Window) -> float:
         cl = []
         for beat in window.ap_beats():
             cl.append(beat.data[TIME][0])
@@ -493,9 +493,7 @@ class Rate_AP: #unit: beats per (minute/X)
         return utility.BEATS_PER_X
 
     def calculate(self, window: Window) -> float:
-        seconds_in_min = 60
-        scale = 1000
-        return seconds_in_min/float(CL().calculate(window)/scale)
+        return 1/CL().calculate(window)
 
 class RAPP_APD: #unit: None
     def __init__(self) -> None:
@@ -677,17 +675,22 @@ BIOMARKERS = {'MDP': MDP(),
 
 class Biomarkers:
     def __init__(self, args, patch_idx: int, patch_count: int) -> None:
-        self.window_start = args[0].get('window_start', None)
-        self.window_end = args[0].get('window_end', None)
         self.target = args[0]['target']
         self.file = args[0]['file']
         self.patch_file = utility.append_patch(self.file, patch_idx, patch_count)
         self.biomarkers = []
+        self.biomarker_units = {}
         for i in range(1,len(args)):
             bio = args[i]['biomarker']
+            if "unit" in args[i]:
+                unit = args[i]['unit']
+            else:
+                unit = "default"
+
             if not bio in BIOMARKERS:
                 raise ValueError(f'Unrecognized biomarker `{bio}`')
             self.biomarkers.append(BIOMARKERS[bio])
+            self.biomarker_units[bio] = unit
 
     def __str__(self) -> str:
         bio_str = ' , '.join(map(str, list(map(type, self.biomarkers))))
@@ -712,7 +715,7 @@ class Biomarkers:
     def run(self, experiment: exp.Experiment) -> None:
         # Collect list of all needed data from biomarkers
         names = self._required_data_full()
-        header = [str(bm) for bm in self.biomarkers]
+        header = [str(bm)+f" ({self.biomarker_units[str(bm)]})" for bm in self.biomarkers]
         all_results = []
         # get data through the experiment needed for the biomarkers
         for idx in experiment.patch:
@@ -720,14 +723,19 @@ class Biomarkers:
             data = Window(experiment.get_data(names, idx))
             results = ['nan'] * len(self.biomarkers)
             for i in range(len(self.biomarkers)):
-                try:
-                    results[i] = str(self.biomarkers[i].calculate(data))
-                except:
-                    results[i] = 'nan'
+                value = self.biomarkers[i].calculate(data)
+                unit = self.biomarker_units[str(self.biomarkers[i])]
+                type = self.biomarkers[i].return_type()
+                if unit == "default":
+                    unit = utility.default_option[type]
+                    self.biomarker_units[str(self.biomarkers[i])] = unit
+                results[i] = str(utility.convert_from_default(value, unit))
+               # except:
+                   # results[i] = 'nan'
 
             # Remove following comments to print out biomarkers for each cell
-            #for name, result in zip(header, results):
-            #    print(f"{name}: {result}")
+            #for bm, result in zip(self.biomarkers, results):
+            #    print(f"{str(bm)}: {result} {self.biomarker_units[str(bm)]}")
 
 
             all_results.append(results)
