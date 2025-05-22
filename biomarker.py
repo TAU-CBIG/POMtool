@@ -123,6 +123,8 @@ class Max_Cai:
 
     def required_data(self) -> list:
         return [TIME, CALSIUM]
+    def return_type(self) -> str:
+        return utility.MOLAR
 
     def calculate(self, window: Window) -> float:
         max_cai = np.zeros(window.beat_count)
@@ -143,6 +145,8 @@ class Min_Cai: #unit: mol
     def required_data(self) -> list:
 
         return [TIME, CALSIUM]
+    def return_type(self) -> str:
+        return utility.MOLAR
 
     def calculate(self, window: Window) -> float:
         min_cai = np.zeros(window.beat_count)
@@ -164,6 +168,8 @@ class Rate_Cai: #Unit Hz
     def required_data(self) -> list:
 
         return [TIME, VM, STIM, CALSIUM]  # makewin tarvii noi muutkin
+    def return_type(self) -> str:
+        return utility.FREQUENCY
 
     def calculate(self, window: Window) -> float:
 
@@ -183,6 +189,8 @@ class MDP:
 
     def required_data(self) -> list:
         return [TIME, VM, STIM]
+    def return_type(self) -> str:
+        return utility.POTENTIAL
 
     def calculate(self, window: Window) -> float:
         all_values = np.zeros(window.beat_count)
@@ -199,6 +207,8 @@ class CL:
 
     def required_data(self) -> list:
         return [TIME, VM, STIM]
+    def return_type(self) -> str:
+        return utility.TIME
 
     def calculate(self, window: Window) -> np.ndarray:
         cl = []
@@ -217,6 +227,8 @@ class dv_dt_max: #unit: V/s
 
     def required_data(self) -> list:
         return [TIME, VM, STIM]
+    def return_type(self) -> str:
+        return utility.VOLT_PER_SECOND
 
     def calculate(self, window: Window) -> float:
         dV_dt = []
@@ -236,6 +248,8 @@ class APA:
 
     def required_data(self) -> list:
         return [TIME, VM, STIM]
+    def return_type(self) -> str:
+        return utility.POTENTIAL
 
     def calculate(self, window: Window) -> float:
         max = -np.inf
@@ -255,6 +269,8 @@ class Peak: #Unit: V
 
     def required_data(self) -> list:
         return [TIME, VM, STIM]
+    def return_type(self) -> str:
+        return utility.POTENTIAL
 
     def calculate(self, window: Window) -> float:
         ap_values = []
@@ -274,6 +290,8 @@ class RTNM: #unit: S
 
     def required_data(self) -> list:
         return [TIME, CALSIUM]
+    def return_type(self) -> str:
+        return utility.TIME
 
     def calculate(self, window: Window) -> float:
         N = self.N/100
@@ -302,6 +320,8 @@ class DTNM: #unit: S
         return 'DT'+ str(self.N)+str(self.M)
     def required_data(self) -> list:
         return [TIME, CALSIUM]
+    def return_type(self) -> str:
+        return utility.TIME
     def calculate(self, window: Window) -> float:
         N = self.N/100
         M = self.M/100
@@ -332,6 +352,8 @@ class RTNPeak: #unit: S
 
     def required_data(self) -> list:
         return [TIME, CALSIUM]
+    def return_type(self) -> str:
+        return utility.TIME
 
     def calculate(self, window: Window) -> float:
         N = self.N / 100
@@ -360,6 +382,8 @@ class CAI_DURATION: #unit: S
 
     def required_data(self) -> list:
         return [TIME, CALSIUM]
+    def return_type(self) -> str:
+        return utility.TIME
     def calculate(self, window: Window) -> float:
 
         cai_beats = window.cai_beats()
@@ -391,6 +415,8 @@ class CTDN: #unit: S
 
     def required_data(self) -> list:
         return [TIME, CALSIUM]
+    def return_type(self) -> str:
+        return utility.TIME
 
     def calculate(self, window: Window) -> float:
         ctdn = []
@@ -424,6 +450,9 @@ class APD_N: #unit: S
 
     def required_data(self) -> list:
         return [TIME, VM, STIM]
+    def return_type(self) -> str:
+        return utility.TIME
+
 
     def calculate(self, window: Window) -> float:
         all_values = np.zeros(window.beat_count)
@@ -460,6 +489,8 @@ class Rate_AP: #unit: beats per (minute/X)
 
     def required_data(self) -> list:
         return [TIME, VM, STIM]
+    def return_type(self) -> str:
+        return utility.BEATS_PER_X
 
     def calculate(self, window: Window) -> float:
         seconds_in_min = 60
@@ -475,6 +506,8 @@ class RAPP_APD: #unit: None
 
     def required_data(self) -> list:
         return [TIME, VM, STIM]
+    def return_type(self) -> str:
+        return utility.UNITLESS
 
     def calculate(self, window: Window) -> float: #toimii
         values = []
@@ -502,6 +535,8 @@ class peakTension: #unit: N/m^2
 
     def required_data(self) -> list:
         return [FORCE]
+    def return_type(self) -> str:
+        return utility.FORCE_PER_METER
 
     def calculate(self, window: Window) -> float:
         maxtension = []
@@ -522,7 +557,8 @@ class cellShortPerc: #unit: None
 
     def required_data(self) -> list:
         return [TIME, VM, LSARC]
-
+    def return_type(self) -> str:
+        return utility.UNITLESS
     def calculate(self, window: Window) -> float:
         cellshort = []
         max_Lsarc = -np.inf
@@ -546,6 +582,8 @@ class relaxTime50: #unit: S
 
     def required_data(self) -> list:
         return [TIME, VM, STIM, LSARC, FORCE]
+    def return_type(self) -> str:
+        return utility.TIME
 
     def calculate(self, window: Window) -> float:
         relaxTime50Buf = np.zeros(window.beat_count-1)
