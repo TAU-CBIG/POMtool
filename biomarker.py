@@ -783,7 +783,7 @@ class Biomarkers:
         file_name = f'{experiment.cwd}/{self.patch_file}'
         file = open(file_name, 'w')
         file.write(CSV_SEPARATOR.join(['directory'] + header) + CSV_ENDLINE)
-        idx = 0
+        idx = experiment.patch.start
         for res in all_results:
-            file.write(experiment.get_directory(idx) + CSV_SEPARATOR + CSV_SEPARATOR.join(res) + CSV_ENDLINE)
+            file.write(experiment.get_id(idx) + CSV_SEPARATOR + CSV_SEPARATOR.join(res) + CSV_ENDLINE)
             idx += 1
