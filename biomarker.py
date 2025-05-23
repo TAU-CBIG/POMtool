@@ -448,12 +448,12 @@ class CTDN(BiomarkerBase):
     def return_type(self) -> str:
         return utility.TIME
 
-    def calculate(self, window: Window) -> float:
+    def calculate(self, window: Window) -> float: #TMP: Change this to match APD_N
         ctdn = []
         N_ = 1-self.N/100
         cai_beats = window.cai_beats()
 
-        for i in range(window.beat_count - 1): #n-1 first beats
+        for i in range(window.beat_count - 1):
             beat = cai_beats[i]
             next_beat = cai_beats[i + 1]
 
@@ -486,6 +486,15 @@ class APD_N(BiomarkerBase):
         return utility.TIME
 
     def calculate(self, window: Window) -> float:
+        def vector_point_calc(b: Beat, h1, h2, value) -> float:
+            x1 =np.array([b.data[TIME][h1], b.data[VM][h1]])
+            x2 = np.array([b.data[TIME][h2], b.data[VM][h2]])
+
+            vec = x2-x1
+            k = (value-x1[1])/vec[1]
+            vec2 = k*vec
+            return x1[0] + vec2[0]
+
         all_values = np.zeros(window.beat_count)
         i = 0
         beat: Beat
@@ -499,13 +508,19 @@ class APD_N(BiomarkerBase):
             # Two values at given height, (start and end)
             at_height = np.argwhere(beat.data[VM] > value_height).ravel()
             all_values[i] = beat.data[TIME][at_height[-1]] - beat.data[TIME][at_height[0]]
+            t0 = vector_point_calc(beat, at_height[0]-1, at_height[0], value_height)
+            t1 = vector_point_calc(beat, at_height[-1], at_height[-1]+1, value_height)
+            all_values[i] = t1-t0
             beat.biomarkers[str(self)] = all_values[i]
             i += 1
+
+
             # Debug printing if you want to check what is actually happening
             # plt.plot(beat.data[TIME],beat.data[VM])
             # plt.plot(beat.data[TIME][beat.bot_idx], beat.data[VM][beat.bot_idx], 'x')
             # plt.plot(beat.data[TIME][beat.top_idx], beat.data[VM][beat.top_idx], 'o')
-            # plt.plot(beat.data[TIME][[at_height[1], at_height[-1]]], [value_height, value_height])
+
+            # plt.plot([t0, t1], [value_height, value_height])
             # plt.show()
             #In matlab it takes maximium peak and we take first peak
 
