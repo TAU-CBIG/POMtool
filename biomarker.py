@@ -738,7 +738,7 @@ class Biomarkers:
 
     def __str__(self) -> str:
         bio_str = ' , '.join(map(str, list(map(type, self.biomarkers))))
-        return f'id: {self.id} | target: {self.target} | file: {self.file}| {bio_str}'
+        return f'target: {self.target} | file: {self.file}| {bio_str}'
 
     def _required_data_full(self) -> list:
         required_data = []
