@@ -202,7 +202,7 @@ class Rate_Cai(BiomarkerBase):
         return 'Rate_Cai'
 
     def required_data(self) -> list:
-        return [TIME, VM, STIM, CALSIUM]  # makewin tarvii noi muutkin
+        return [TIME, VM, CALSIUM]
 
     def return_type(self) -> str:
         return utility.FREQUENCY
@@ -220,7 +220,7 @@ class MDP(BiomarkerBase):
         return 'MDP'
 
     def required_data(self) -> list:
-        return [TIME, VM, STIM]
+        return [TIME, VM]
 
     def return_type(self) -> str:
         return utility.POTENTIAL
@@ -236,7 +236,7 @@ class CL(BiomarkerBase):
         return 'CL'
 
     def required_data(self) -> list:
-        return [TIME, VM, STIM]
+        return [TIME, VM]
 
     def return_type(self) -> str:
         return utility.TIME
@@ -254,7 +254,7 @@ class dv_dt_max(BiomarkerBase):
         return 'dv_dt_max'
 
     def required_data(self) -> list:
-        return [TIME, VM, STIM]
+        return [TIME, VM]
 
     def return_type(self) -> str:
         return utility.VOLT_PER_SECOND
@@ -273,7 +273,7 @@ class APA(BiomarkerBase):
         return 'APA'
 
     def required_data(self) -> list:
-        return [TIME, VM, STIM]
+        return [TIME, VM]
 
     def return_type(self) -> str:
         return utility.POTENTIAL
@@ -292,7 +292,7 @@ class Peak(BiomarkerBase):
         return 'Peak'
 
     def required_data(self) -> list:
-        return [TIME, VM, STIM]
+        return [TIME, VM]
 
     def return_type(self) -> str:
         return utility.POTENTIAL
@@ -538,7 +538,7 @@ class Rate_AP(BiomarkerBase):
         return 'Rate_AP'
 
     def required_data(self) -> list:
-        return [TIME, VM, STIM]
+        return [TIME, VM]
 
     def return_type(self) -> str:
         return utility.BEATS_PER_X
@@ -551,7 +551,7 @@ class RAPP_APD(BiomarkerBase):
         return 'RAPP_APD'
 
     def required_data(self) -> list:
-        return [TIME, VM, STIM]
+        return [TIME, VM]
 
     def return_type(self) -> str:
         return utility.UNITLESS
@@ -624,7 +624,7 @@ class relaxTime50(BiomarkerBase):
         return 'relaxTime50'
 
     def required_data(self) -> list:
-        return [TIME, VM, STIM, LSARC, FORCE]
+        return [TIME, VM, LSARC, FORCE]
 
     def return_type(self) -> str:
         return utility.TIME
