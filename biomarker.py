@@ -42,6 +42,7 @@ class Window:
         self._ap_beats = [] # views describing the beats based on Vm
         self._cai_beats = [] # views describing the beats based on Cai
         self.beat_count = 9
+        self.ap_bot_calculated = False
 
     def ap_beats(self) -> list:
         if not self._ap_beats:
@@ -71,10 +72,20 @@ class Window:
         if STIM in self.data:
             if 1 < len(np.unique(self.data[STIM])):
                 self.is_stimulated = True
-        self._make_ap_top()
 
+        for beat in self._ap_beats:
+            top_idx, _ = scipy.signal.find_peaks(beat.data[VM])
+            try:
+                beat.top_idx = top_idx[0]
+            except:
+                beat.top_idx = top_idx
 
-    def _make_ap_top(self) -> None:
+    def make_ap_bot(self) -> None:
+        # Only needed for APD_N, but as it is needed for each, we store these in window to avoid recalculation
+        if self.ap_bot_calculated:
+            return
+        self.ap_bot_calculated = True
+
         if self.is_stimulated:
             for beat in self._ap_beats:
                 beat.bot_idx = np.nonzero(0 < np.diff(beat.data[STIM]))[0] + 1
@@ -97,12 +108,6 @@ class Window:
                 idxBOT = np.max(np.argwhere(Vm_shorter <= BOT))
                 beat.bot_idx = idxBOT
 
-        for beat in self._ap_beats:
-            top_idx, _ = scipy.signal.find_peaks(beat.data[VM])
-            try:
-                beat.top_idx = top_idx[0]
-            except:
-                beat.top_idx = top_idx
 
 
     def _make_cai_beats(self) -> None:
@@ -495,6 +500,7 @@ class APD_N(BiomarkerBase):
             vec2 = k*vec
             return x1[0] + vec2[0]
 
+        window.make_ap_bot() # Ensure that we have bot idx
         all_values = np.zeros(window.beat_count)
         i = 0
         beat: Beat
