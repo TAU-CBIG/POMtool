@@ -761,7 +761,10 @@ class Biomarkers:
             data = Window(experiment.get_data(names, idx))
             results = ['nan'] * len(self.biomarkers)
             for i in range(len(self.biomarkers)):
-                value = self.biomarkers[i].calculate(data)
+                try:
+                    value = self.biomarkers[i].calculate(data)
+                except:
+                    value = float('nan')
                 unit = self.biomarker_units[str(self.biomarkers[i])]
                 type = self.biomarkers[i].return_type()
                 if unit == "default":
