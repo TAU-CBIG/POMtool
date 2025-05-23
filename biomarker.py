@@ -77,7 +77,7 @@ class Window:
     def _make_ap_top(self) -> None:
         if self.is_stimulated:
             for beat in self._ap_beats:
-                beat.bot_idx = np.nonzero(0 < np.diff(beat.data[STIM]))[0]
+                beat.bot_idx = np.nonzero(0 < np.diff(beat.data[STIM]))[0] + 1
         else:
             for beat in self._ap_beats:
                 Vm = beat.data[VM]
