@@ -151,6 +151,9 @@ class BiomarkerBase:
     def required_data(self) -> list:
         raise NotImplementedError()
 
+    def optional_data(self) -> list:
+        return []
+
     def return_type(self) -> str:
         raise NotImplementedError()
 
@@ -485,7 +488,10 @@ class APD_N(BiomarkerBase):
         return 'APD' + str(self.N)
 
     def required_data(self) -> list:
-        return [TIME, VM, STIM]
+        return [TIME, VM]
+
+    def optional_data(self) -> list:
+        return [STIM] # This will change how ap_bot_idx is calculate
 
     def return_type(self) -> str:
         return utility.TIME
@@ -748,6 +754,14 @@ class Biomarkers:
                     required_data.append(data_name)
         return required_data
 
+    def _optional_data_full(self) -> list:
+        optional_data = []
+        for bm in self.biomarkers:
+            for data_name in bm.optional_data():
+                if data_name not in optional_data:
+                    optional_data.append(data_name)
+        return optional_data
+
     def dry(self, experiment: exp.Experiment) -> None:
         print("Find biomarkers for the following:")
         for bm in self.biomarkers:
@@ -758,13 +772,14 @@ class Biomarkers:
 
     def run(self, experiment: exp.Experiment) -> None:
         # Collect list of all needed data from biomarkers
-        names = self._required_data_full()
+        names_required = self._required_data_full()
+        names_optional = self._optional_data_full()
         header = [str(bm)+f" ({self.biomarker_units[str(bm)]})" for bm in self.biomarkers]
         all_results = []
         # get data through the experiment needed for the biomarkers
         for idx in experiment.patch:
             # get data through the experiment needed for the biomarkers
-            data = Window(experiment.get_data(names, idx))
+            data = Window(experiment.get_data(names_required, names_optional, idx))
             results = ['nan'] * len(self.biomarkers)
             for i in range(len(self.biomarkers)):
                 try:

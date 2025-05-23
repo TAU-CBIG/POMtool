@@ -70,16 +70,19 @@ class Model:
 
         subprocess.run(' '.join(command), shell=True, cwd=current_wd, stdout=stdout_file, stderr=stderr_file)
 
-    def get_data(self, directory: str, names: list) -> dict:
+    def get_data(self, directory: str, required_names: list, optional_names: list) -> dict:
         ret_data = {}
         # opencarp = np.genfromtxt(args.name, delimiter=' ')
         traces = {}
         headers = {}
         mat_files ={}
 
+        names = set(required_names + optional_names)
+        required = set(required_names)
+
         for name in names:
-            if not name in self.vals:
-                raise ValueError(f'`{name}`-val not found from model')
+            if name in required and not name in self.vals:
+                raise ValueError(f'Required value `{name}` not found from model')
             value_data = self.vals[name]
             if value_data['method'] == 'binary':
                 ret_data[name] = np.fromfile(f'{directory}/{value_data["file"]}')

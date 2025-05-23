@@ -86,5 +86,5 @@ class Experiment:
             method(self.model, full_path, parameters[idx,:])
         return manifest
 
-    def get_data(self, names: list, idx: int) -> dict:
-        return self.model.get_data(self.get_directory(idx), names)
+    def get_data(self, required_names: list, optional_names: list, idx: int) -> dict:
+        return self.model.get_data(self.get_directory(idx), required_names, optional_names)
