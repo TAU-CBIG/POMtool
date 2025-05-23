@@ -136,10 +136,24 @@ class Window:
             beat.mcp_idx = int(location[0])
 
 
-class Max_Cai:
+class BiomarkerBase:
     def __init__(self) -> None:
         pass
 
+    def __str__(self) -> str:
+        return "undefined"
+
+    def required_data(self) -> list:
+        raise NotImplementedError()
+
+    def return_type(self) -> str:
+        raise NotImplementedError()
+
+    def calculate(self, window: Window) -> float:
+        raise NotImplementedError()
+
+
+class Max_Cai(BiomarkerBase):
     def __str__(self) -> str:
         return 'Max_Cai'
 
@@ -158,10 +172,7 @@ class Max_Cai:
         return np.mean(max_cai)
 
 
-class Min_Cai: #unit: mol
-    def __init__(self) -> None:
-        pass
-
+class Min_Cai(BiomarkerBase):
     def __str__(self) -> str:
         return 'Min_Cai'
 
@@ -181,10 +192,7 @@ class Min_Cai: #unit: mol
         return np.mean(min_cai)
 
 
-class Rate_Cai: #Unit Hz
-    def __init__(self) -> None:
-        pass
-
+class Rate_Cai(BiomarkerBase):
     def __str__(self) -> str:
         return 'Rate_Cai'
 
@@ -202,10 +210,7 @@ class Rate_Cai: #Unit Hz
         Freq = 1/CLCa
         return Freq.mean()
 
-class MDP:
-    def __init__(self) -> None:
-        pass
-
+class MDP(BiomarkerBase):
     def __str__(self) -> str:
         return 'MDP'
 
@@ -221,10 +226,7 @@ class MDP:
             all_values[i] = window.ap_beats()[i].data[VM][0]
         return all_values.mean()
 
-class CL:
-    def __init__(self) -> None:
-        pass
-
+class CL(BiomarkerBase):
     def __str__(self) -> str:
         return 'CL'
 
@@ -242,10 +244,7 @@ class CL:
 
         return np.mean(cl)
 
-class dv_dt_max: #unit: V/s
-    def __init__(self) -> None:
-        pass
-
+class dv_dt_max(BiomarkerBase):
     def __str__(self) -> str:
         return 'dv_dt_max'
 
@@ -264,10 +263,7 @@ class dv_dt_max: #unit: V/s
         return np.mean(dV_dt)
 
 
-class APA:
-    def __init__(self) -> None:
-        pass
-
+class APA(BiomarkerBase):
     def __str__(self) -> str:
         return 'APA'
 
@@ -286,10 +282,7 @@ class APA:
         return max-MDP().calculate(window)
 
 
-class Peak: #Unit: V
-    def __init__(self) -> None:
-        pass
-
+class Peak(BiomarkerBase):
     def __str__(self) -> str:
         return 'Peak'
 
@@ -307,8 +300,9 @@ class Peak: #Unit: V
         return np.mean(ap_values)
 
 
-class RTNM: #unit: S
-    def __init__(self, N: int,  M: int) -> None:
+class RTNM(BiomarkerBase):
+    def __init__(self, N: int, M: int) -> None:
+        super().__init__()
         self.N = N
         self.M = M
 
@@ -340,8 +334,9 @@ class RTNM: #unit: S
 
         return np.mean(risetime)
 
-class DTNM: #unit: S
-    def __init__(self, N: int,  M: int) -> None:
+class DTNM(BiomarkerBase):
+    def __init__(self, N: int, M: int) -> None:
+        super().__init__()
         self.N = N
         self.M = M
 
@@ -375,8 +370,9 @@ class DTNM: #unit: S
 
         return np.mean(dectime)
 
-class RTNPeak: #unit: S
-    def __init__(self, N: int) -> None:
+class RTNPeak(BiomarkerBase):
+    def __init__(self, N) -> None:
+        super().__init__()
         self.N = N
 
     def __str__(self) -> str:
@@ -407,10 +403,7 @@ class RTNPeak: #unit: S
         return np.mean(rtpeak)
 
 
-class CAI_DURATION: #unit: S
-    def __init__(self) -> None:
-        pass
-
+class CAI_DURATION(BiomarkerBase):
     def __str__(self) -> str:
         return 'CAI_DURATION'
 
@@ -441,8 +434,9 @@ class CAI_DURATION: #unit: S
         return np.mean(duration)
 
 
-class CTDN: #unit: S
+class CTDN(BiomarkerBase):
     def __init__(self, N: int) -> None:
+        super().__init__()
         self.N = N
 
     def __str__(self) -> str:
@@ -476,9 +470,10 @@ class CTDN: #unit: S
         return np.mean(ctdn)
 
 
-class APD_N: #unit: S
+class APD_N(BiomarkerBase):
     '''action potential duration at N% repolarization'''
     def __init__(self, N: int) -> None:
+        super().__init__()
         self.N = N
 
     def __str__(self) -> str:
@@ -517,10 +512,7 @@ class APD_N: #unit: S
         return all_values.mean()
 
 
-class Rate_AP: #unit: beats per (minute/X)
-    def __init__(self) -> None:
-        pass
-
+class Rate_AP(BiomarkerBase):
     def __str__(self) -> str:
         return 'Rate_AP'
 
@@ -533,10 +525,7 @@ class Rate_AP: #unit: beats per (minute/X)
     def calculate(self, window: Window) -> float:
         return 1/CL().calculate(window)
 
-class RAPP_APD: #unit: None
-    def __init__(self) -> None:
-        pass
-
+class RAPP_APD(BiomarkerBase):
     def __str__(self) -> str:
         return 'RAPP_APD'
 
@@ -563,10 +552,7 @@ class RAPP_APD: #unit: None
 
         return np.mean(values)
 
-class peakTension: #unit: N/m^2
-    def __init__(self) -> None:
-        pass
-
+class peakTension(BiomarkerBase):
     def __str__(self) -> str:
         return 'peakTension'
 
@@ -586,10 +572,7 @@ class peakTension: #unit: N/m^2
 
         return np.mean(maxtension)
 
-class cellShortPerc: #unit: None
-    def __init__(self) -> None:
-        pass
-
+class cellShortPerc(BiomarkerBase):
     def __str__(self) -> str:
         return 'cellShortPerc'
 
@@ -615,10 +598,7 @@ class cellShortPerc: #unit: None
         cellshortperc = 100*Cellshort/max_Lsarc
         return cellshortperc
 
-class relaxTime50: #unit: S
-    def __init__(self) -> None:
-        pass
-
+class relaxTime50(BiomarkerBase):
     def __str__(self) -> str:
         return 'relaxTime50'
 
