@@ -34,9 +34,12 @@ class Experiment:
     def __str__(self) -> str:
         return self.id
 
-    def get_directory(self, idx) -> str:
+    def get_id(self, idx) -> str:
         str_length = len(str(self.cells))
-        return f'{self.cwd}/{self.name.replace("#", str(idx+1).rjust(str_length, "0"))}'
+        return self.name.replace("#", str(idx+1).rjust(str_length, "0"))
+
+    def get_directory(self, idx) -> str:
+        return f'{self.cwd}/{self.get_id(idx)}'
 
     def _generate_parameters(self) -> np.ndarray:
         x = np.ndarray([])
@@ -51,7 +54,7 @@ class Experiment:
         manifest = ''
         # run for each parameter
         for idx in self.patch:
-            directory = self.get_directory(idx)
+            directory = self.get_id(idx)
             manifest_line = [directory]
             for par in parameters[idx,:]:
                 manifest_line.append(str(par))
