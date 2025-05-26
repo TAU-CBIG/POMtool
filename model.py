@@ -81,8 +81,10 @@ class Model:
         required = set(required_names)
 
         for name in names:
-            if name in required and not name in self.vals:
-                raise ValueError(f'Required value `{name}` not found from model')
+            if name not in self.vals:
+                if name in required:
+                    raise ValueError(f'Required value `{name}` not found from model')
+                continue
             value_data = self.vals[name]
             if value_data['method'] == 'binary':
                 ret_data[name] = np.fromfile(f'{directory}/{value_data["file"]}')
