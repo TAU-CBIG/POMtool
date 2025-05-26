@@ -791,7 +791,7 @@ class Biomarkers:
                 if unit == "default":
                     unit = utility.default_option[type]
                     self.biomarker_units[str(self.biomarkers[i])] = unit
-                    header[i] = unit
+                    header[i] = str(self.biomarkers[i])+f" ({unit})"
                 results[i] = str(utility.convert_from_default(value, unit))
 
             # Remove following comments to print out biomarkers for each cell
