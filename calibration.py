@@ -69,6 +69,9 @@ class Protocol:
                 for val in next(reader):
                     if '(' not in val and ')' not in val:
                         val += '(default)'
+                    elif '(' not in val or ')' not in val:
+                        raise KeyError(f"Fix the limits to format 'biomarker_name (unit)' or 'biomarker_name' instead of '{val}'")
+
                     val = val.strip()
                     name, unit = val.split("(")
                     name = name.strip()
@@ -79,11 +82,15 @@ class Protocol:
                 min_values = []
                 for value in next(reader):
                     value = value.strip()
+                    if value == "" or value=="none":
+                        value = "-inf"
                     min_values.append(float(value))
                 #Parse max values (third line)
                 max_values = []
                 for value in next(reader):
                     value = value.strip()
+                    if value == "" or value == "none":
+                        value = "inf"
                     max_values.append(float(value))
 
                 values = tuple(zip(min_values, max_values))
