@@ -27,6 +27,8 @@ class Protocol:
         self.is_setup_data = False
         self.fail_dict_name = None
         self.ranges = {}
+        self.range_units = {}
+        self.is_ranges_converted = False
 
         if self.contains_fail_path:
             self.fail_dict_name = args['fail_path']
@@ -60,11 +62,33 @@ class Protocol:
         if self.method == 'range':
             with open(self.input_data_path, 'r') as file: #(example_range.csv)
                 reader = csv.reader(file)
-                header = [val.strip() for val in next(reader)]
-                min_values = [float(value) for value in next(reader)]
-                max_values = [float(value) for value in next(reader)]
+                header = []
+                units = {}
+
+                #Parse names (first line)
+                for val in next(reader):
+                    if '(' not in val and ')' not in val:
+                        val += '(default)'
+                    val = val.strip()
+                    name, unit = val.split("(")
+                    name = name.strip()
+                    units[name] = unit[:-1].strip()
+                    header.append(name.strip())
+
+                #Parse min values (second line)
+                min_values = []
+                for value in next(reader):
+                    value = value.strip()
+                    min_values.append(float(value))
+                #Parse max values (third line)
+                max_values = []
+                for value in next(reader):
+                    value = value.strip()
+                    max_values.append(float(value))
+
                 values = tuple(zip(min_values, max_values))
                 self.ranges = dict(zip(header, values))
+                self.range_units = units
                 for key, val in self.ranges.items():
                     if val[0] > val[1]:
                         raise ValueError(f'For range in `{self.input_data_path}` with key `{key}`, minimum({val[0]}) is larger than maximum({val[1]})')
