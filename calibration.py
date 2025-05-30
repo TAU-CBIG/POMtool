@@ -5,6 +5,13 @@ import utility
 import experiment as exp
 
 
+def convert_to_default(value: float, unit: str):
+    try:
+        return utility.convert_to_default(value, unit)
+    except:
+        raise KeyError(f"Calibration tried to use unit '{unit}'. Hint: Check your 'range.csv' units. We only support units: {list(utility.unit_to_scimath.keys())}")
+
+
 class Protocol:
     def __init__(self, args: dict, cwd: str, patch_idx: int, patch_count: int) -> None:
         self.method = args['protocol']
@@ -76,6 +83,19 @@ class Protocol:
             if val < min or val > max:
                 return False
         return True
+
+
+    def convert_biomarkers(self, biomarkers: dict) -> dict: #convert biomarkers to "default" unit
+        bio_units = {}
+        for name in biomarkers.keys():
+            value = biomarkers[name]
+            if type(value) != float:
+                bio_units[name] = value
+                continue
+            unit = self.biomarker_units[name]
+            bio_units[name] = convert_to_default(float(value), unit)
+        return bio_units
+
 
 class Calibration:
     def __init__(self, args, experiment: exp.Experiment, patch_idx: int, patch_count: int) -> None:
