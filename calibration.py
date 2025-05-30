@@ -94,7 +94,19 @@ class Calibration:
     def run(self) -> None:
         with open(self.biomarker_file) as csvfile: # in example (biomarkers.csv)
             reader = csv.reader(csvfile)
-            header = [val.strip() for val in next(reader)]
+            header = []
+            units = {}
+
+            # Parse biomarker header
+            for val in next(reader):
+                if "(" not in val:
+                    header.append(val)
+                    continue
+                val = val.strip()
+                name, unit = val.split("(")
+                name = name.strip()
+                units[name] = unit[:-1].strip()
+                header.append(name)
             for line in reader:
                 for protocol in self.protocols:
                     looks = dict(zip(header, [convert_to(value) for value in line]))
