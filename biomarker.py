@@ -789,7 +789,10 @@ class Biomarkers:
                     unit = utility.default_option[type]
                     self.biomarker_units[str(self.biomarkers[i])] = unit
                     header[i] = str(self.biomarkers[i])+f" ({unit})"
-                results[i] = str(utility.convert_from_default(value, unit))
+                try:
+                    results[i] = str(utility.convert_from_default(value, unit))
+                except:
+                    raise KeyError(f"We do not support the requested biomarker unit '{unit}'. We support units: {list(utility.unit_to_scimath.keys())}")
 
             # Remove following comments to print out biomarkers for each cell
             #for bm, result in zip(self.biomarkers, results):
