@@ -15,24 +15,50 @@ def convert_to_default(value: float, unit: str):
 class Protocol:
     def __init__(self, args: dict, cwd: str, patch_idx: int, patch_count: int) -> None:
         self.method = args['protocol']
-        self.contains_fail_path = 'fail_path' in args
-        self.contains_success_path = 'success_path' in args
+        self.contains_fail_path = 'fail_path' in args.keys()
+        self.contains_success_path = 'success_path' in args.keys()
+        self.patch_idx = patch_idx
+        self.patch_count = patch_count
+        self.cwd = cwd
+        self.fail_path = None
+        self.success_path = None
+        self.input_data_path = None
         self.biomarker_units = {}
+        self.is_setup_data = False
+        self.fail_dict_name = None
+        self.ranges = {}
+
         if self.contains_fail_path:
-            self.fail_path = cwd + '/' + utility.append_patch(args['fail_path'], patch_idx, patch_count)
+            self.fail_dict_name = args['fail_path']
+
+        self.success_dict_name = None
+        if self.contains_success_path:
+            self.success_dict_name = args['success_path']
+
+        self.input_data_path = None
+        if 'input_data_path' in args.keys():
+            self.input_data_path = args['input_data_path']
+
+
+    def setup_data(self) ->None:
+        if self.is_setup_data:
+            return
+        self.is_setup_data = True
+
+        if self.contains_fail_path:
+            self.fail_path = self.cwd + '/' + utility.append_patch(self.fail_dict_name, self.patch_idx, self.patch_count)
             pathlib.Path(self.fail_path).parent.mkdir(exist_ok=True, parents=True)
             with open(self.fail_path, 'w'):
                 pass #truncate
 
         if self.contains_success_path:
-            self.success_path = cwd + '/' + utility.append_patch(args['success_path'], patch_idx, patch_count)
+            self.success_path = self.cwd + '/' + utility.append_patch(self.success_dict_name, self.patch_idx, self.patch_count)
             pathlib.Path(self.success_path).parent.mkdir(exist_ok=True, parents=True)
             with open(self.success_path, 'w'):
                 pass #truncate
 
         if self.method == 'range':
-            self.input_data_path = args['input_data_path']
-            with open(self.input_data_path, 'r') as file:
+            with open(self.input_data_path, 'r') as file: #(example_range.csv)
                 reader = csv.reader(file)
                 header = [val.strip() for val in next(reader)]
                 min_values = [float(value) for value in next(reader)]
@@ -124,6 +150,7 @@ class Calibration:
                 units[name] = unit[:-1].strip()
                 header.append(name)
             for protocol in self.protocols:
+                protocol.setup_data()
                 protocol.biomarker_units = units
 
             # Parse other lines (lines with numbers)
