@@ -24,10 +24,7 @@ class Beat:
 class Cai_Beat:
     def __init__(self) -> None:
         self.data = {}
-        self.bot_idx = 0
         self.top_idx = 0
-        self.end_idx =0
-        self.start_idx=0
         self.mcp_idx = 0
 
 class Window:
@@ -491,7 +488,7 @@ class APD_N(BiomarkerBase):
         return [TIME, VM]
 
     def optional_data(self) -> list:
-        return [STIM] # This will change how ap_bot_idx is calculate
+        return [STIM]
 
     def return_type(self) -> str:
         return utility.TIME
