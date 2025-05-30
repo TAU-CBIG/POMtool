@@ -11,7 +11,7 @@ def convert_to(value: str):
         return value
 
 class Protocol:
-    def __init__(self, args, cwd, patch_idx, patch_count) -> None:
+    def __init__(self, args: dict, cwd: str, patch_idx: int, patch_count: int) -> None:
         self.method = args['protocol']
         self.contains_fail_path = 'fail_path' in args
         self.contains_success_path = 'success_path' in args
@@ -40,7 +40,7 @@ class Protocol:
                     if val[0] > val[1]:
                         raise ValueError(f'For range in `{self.input_data_path}` with key `{key}`, minimum({val[0]}) is larger than maximum({val[1]})')
 
-    def run(self, values) -> bool:
+    def run(self, values: dict) -> bool:
         ret_val = False
         if self.method == 'nonan':
             ret_val = self.nonan_method(values)
@@ -59,7 +59,7 @@ class Protocol:
                     file.write(values['directory'] + '\n')
         return ret_val
 
-    def nonan_method(self, values) -> bool:
+    def nonan_method(self, values: dict) -> bool:
         for _, val in values.items():
             if type(val) != float:
                 continue
@@ -69,7 +69,7 @@ class Protocol:
                 return False
         return True
 
-    def range_method(self, values) -> bool:
+    def range_method(self, values: dict) -> bool:
         for key, val in values.items():
             if type(val) != float:
                 continue
@@ -90,7 +90,7 @@ class Calibration:
         return 'No printing in calibration, sorry'
 
     def run(self) -> None:
-        with open(self.biomarker_file) as csvfile:
+        with open(self.biomarker_file) as csvfile: # in example (biomarkers.csv)
             reader = csv.reader(csvfile)
             header = [val.strip() for val in next(reader)]
             for line in reader:
