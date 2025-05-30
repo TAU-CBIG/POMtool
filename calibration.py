@@ -73,6 +73,8 @@ class Protocol:
         for key, val in values.items():
             if type(val) != float:
                 continue
+            if key not in self.ranges:
+                continue
             min = self.ranges[key][0]
             max = self.ranges[key][1]
             if val < min or val > max:
