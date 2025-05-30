@@ -105,6 +105,8 @@ class Protocol:
         if self.method == 'nonan':
             ret_val = self.nonan_method(values)
         elif self.method == 'range':
+            self.ranges, self.range_units = self.convert_ranges(self.biomarker_units, self.ranges, self.range_units)
+            values = self.convert_biomarkers(values)
             ret_val = self.range_method(values)
         else:
             raise RuntimeError('Protocol not defined')
@@ -141,6 +143,21 @@ class Protocol:
                 return False
         return True
 
+    def convert_ranges(self,biomarker_units: dict, ranges: dict, range_units: dict) -> tuple[dict, dict]: #convert ranges to "default" unit
+        if self.is_ranges_converted:
+            return ranges, range_units
+        self.is_ranges_converted = True
+        for name in range_units.keys():
+            unit = range_units[name]
+            if unit == "default":  # If default -> same unit as biomarker
+                unit = biomarker_units[name]
+            range_units[name] = unit  # Might not need this
+
+            min_value = convert_to_default(ranges[name][0], unit)
+            max_value = convert_to_default(ranges[name][1], unit)
+
+            ranges[name] = (min_value, max_value)
+        return ranges, range_units
 
     def convert_biomarkers(self, biomarkers: dict) -> dict: #convert biomarkers to "default" unit
         bio_units = {}
