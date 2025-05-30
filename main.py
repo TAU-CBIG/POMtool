@@ -4,7 +4,7 @@ import argparse
 import pathlib
 import shutil
 import yaml
-import matplotlib.pyplot as plt # temp debug
+#import matplotlib.pyplot as plt # temp debug
 import merge
 import experiment as exp
 import model as mod

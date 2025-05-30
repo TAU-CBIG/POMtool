@@ -1,7 +1,7 @@
 import numpy as np
 import experiment as exp
 import scipy.signal
-import matplotlib.pyplot as plt # temp debug
+#import matplotlib.pyplot as plt # temp debug
 import utility
 
 TIME = 'time'
