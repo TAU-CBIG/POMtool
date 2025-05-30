@@ -10,6 +10,7 @@ class Protocol:
         self.method = args['protocol']
         self.contains_fail_path = 'fail_path' in args
         self.contains_success_path = 'success_path' in args
+        self.biomarker_units = {}
         if self.contains_fail_path:
             self.fail_path = cwd + '/' + utility.append_patch(args['fail_path'], patch_idx, patch_count)
             pathlib.Path(self.fail_path).parent.mkdir(exist_ok=True, parents=True)
@@ -102,6 +103,10 @@ class Calibration:
                 name = name.strip()
                 units[name] = unit[:-1].strip()
                 header.append(name)
+            for protocol in self.protocols:
+                protocol.biomarker_units = units
+
+            # Parse other lines (lines with numbers)
             for line in reader:
                 for protocol in self.protocols:
                     looks = {header[0]: line[0]} #line 0 is str but others need to be a floating point
