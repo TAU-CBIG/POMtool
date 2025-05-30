@@ -29,6 +29,7 @@ class Protocol:
         self.ranges = {}
         self.range_units = {}
         self.is_ranges_converted = False
+        self.is_biomarkers_converted = False
 
         if self.contains_fail_path:
             self.fail_dict_name = args['fail_path']
@@ -160,6 +161,10 @@ class Protocol:
         return ranges, range_units
 
     def convert_biomarkers(self, biomarkers: dict) -> dict: #convert biomarkers to "default" unit
+        if self.is_biomarkers_converted:
+            return biomarkers
+        self.is_biomarkers_converted = True
+
         bio_units = {}
         for name in biomarkers.keys():
             value = biomarkers[name]
