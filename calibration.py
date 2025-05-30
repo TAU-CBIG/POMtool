@@ -4,11 +4,6 @@ import pathlib
 import utility
 import experiment as exp
 
-def convert_to(value: str):
-    try:
-        return float(value)
-    except:
-        return value
 
 class Protocol:
     def __init__(self, args: dict, cwd: str, patch_idx: int, patch_count: int) -> None:
@@ -109,5 +104,9 @@ class Calibration:
                 header.append(name)
             for line in reader:
                 for protocol in self.protocols:
-                    looks = dict(zip(header, [convert_to(value) for value in line]))
-                    protocol.run(looks)
+                    looks = {header[0]: line[0]} #line 0 is str but others need to be a floating point
+                    for name, value in zip(header[1:], line[1:]):
+                        looks[name] = float(value)
+
+                    if not protocol.run(looks):
+                        break
