@@ -38,6 +38,11 @@ class Model:
         return f"{self.exec} {' '.join(self.pars)}"
 
     def _create_command(self, parameters) -> list:
+        if len(parameters) > 9:
+            small = self.param_key.replace('#', str(1))
+            big = self.param_key.replace('#', str(10))
+            if small in big:
+                raise ValueError(f'Ambigious param key `{self.param_key}` for example `{small}` is subset of `{big}`')
         # Replace parameters
         full_command = [self.exec]
 
