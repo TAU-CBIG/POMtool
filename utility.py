@@ -4,7 +4,6 @@ import scimath.units.SI as SI
 def append_patch(name, id, count) -> str:
     return f'{name}-{id + 1}-{count}' if count > 1 else name
 
-time_units = ['s', 'ms']
 FORCE = "Force"
 TIME = "time"
 POTENTIAL = "potential"
@@ -14,20 +13,21 @@ FREQUENCY = "frequency"
 FORCE_PER_METER = "force_per_meter"
 UNITLESS = "unitless"
 VOLT_PER_SECOND = "volt_per_second"
-BEATS_PER_X = "beats_per_minute"
+DEFAULT = "default"
 
-units = {TIME: {"default": SI.second, "s": SI.second, "ms": SI.milli * SI.second, "min": 60 * SI.second},
-         POTENTIAL: {"default": SI.volt, "V": SI.volt, "mV": SI.volt*SI.milli, "uV": SI.micro*SI.volt},
-         FORCE: {"default": SI.newton,"N": SI.newton, "mN": SI.milli*SI.newton},
-         LENGTH: {"default": SI.meter,'m': SI.meter, "mm": SI.milli*SI.meter},
-         MOLAR: {"default": SI.mole,"mol": SI.mole, "umol" : SI.mole*SI.micro, "mmol" : SI.mole*SI.milli},
-         FREQUENCY: {"default": SI.hertz,"Hz": SI.hertz},
-         BEATS_PER_X: {"default" : SI.hertz, "bpm": SI.hertz/60},
-         FORCE_PER_METER : {"default": (SI.milli*SI.newton)/((SI.milli*SI.meter)**2), "mN/mm2":(SI.milli*SI.newton)/((SI.milli*SI.meter)**2)},
-         UNITLESS : {"default": SI.none, "unitless": SI.none},
-         VOLT_PER_SECOND : {"default": SI.volt/SI.second, "mV/ms": (SI.milli*SI.volt)/(SI.milli*SI.second), "V/s": (SI.volt)/(SI.second)}
+base_units = {TIME: {DEFAULT: SI.second, "s": SI.second, "ms": SI.milli * SI.second, "min": 60 * SI.second},
+         POTENTIAL: {DEFAULT: SI.volt, "V": SI.volt, "mV": SI.volt*SI.milli, "uV": SI.micro*SI.volt},
+         FORCE: {DEFAULT: SI.newton,"N": SI.newton, "mN": SI.milli*SI.newton},
+         LENGTH: {DEFAULT: SI.meter,'m': SI.meter, "mm": SI.milli*SI.meter},
+         MOLAR: {DEFAULT: SI.mole,"mol": SI.mole, "umol" : SI.mole*SI.micro, "mmol" : SI.mole*SI.milli},
+         UNITLESS : {DEFAULT: SI.none, "unitless": SI.none},
         }
+derived_units = {FORCE_PER_METER: {DEFAULT: base_units[FORCE][DEFAULT]/base_units[LENGTH][DEFAULT], "mN/mm2":(SI.milli*SI.newton)/((SI.milli*SI.meter)**2)},
+                VOLT_PER_SECOND: {DEFAULT: base_units[POTENTIAL][DEFAULT]/base_units[TIME][DEFAULT], "mV/ms": (SI.milli*SI.volt)/(SI.milli*SI.second), "V/s": SI.volt / SI.second},
+                    FREQUENCY: {DEFAULT: 1/base_units[TIME][DEFAULT],"Hz": 1/base_units[TIME]["s"], "bpm": 1/base_units[TIME]["min"]},
+                  }
 
+units = base_units | derived_units
 
 def initialize_default_unit_of():
 
@@ -37,7 +37,7 @@ def initialize_default_unit_of():
 
     for category in units.keys():
         units_category = units[category]
-        default_unit = units_category["default"]
+        default_unit = units_category[DEFAULT]
 
         for unit_name in units_category:
             if units_category[unit_name]== default_unit:

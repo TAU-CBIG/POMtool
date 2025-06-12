@@ -566,7 +566,7 @@ class Rate_AP(BiomarkerBase):
         return [TIME, VM]
 
     def return_type(self) -> str:
-        return utility.BEATS_PER_X
+        return utility.FREQUENCY
 
     def calculate(self, window: Window) -> float:
         return 1/CL().calculate(window)
