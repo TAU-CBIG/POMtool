@@ -12,6 +12,7 @@ import biomarker as bm
 import calibration as cal
 import sys
 import log
+import optimization
 
 def run_merge(arg_list):
     parser = argparse.ArgumentParser(
@@ -75,6 +76,7 @@ def run_job(arg_list):
     parser.add_argument('--skip-calibration', action='store_true',help='Skip calibration')
     parser.add_argument('--only-calibration', action='store_true',help='Only run calibration, assumes you have run previous steps already and have the data')
     parser.add_argument('--force', action='store_true', help='Override existing files during the experiment')
+    parser.add_argument('--optimization', action='store_true', help='Run only the optimization. Updates given model parameters to achieve target biomarkers')
     args = parser.parse_args(arg_list)
 
     log.INFO = not args.silent
@@ -93,8 +95,18 @@ def run_job(arg_list):
     if args.only_calibration:
         args.skip_experiment = True
         args.skip_biomarkers = True
+
     models = mod.Models(content['model'])
+
+    if args.optimization:
+        log.print_info("Start optimization")
+        optimization.Optimize(content['optimization'], models)
+        log.print_info("End optimization")
+        return
+
+
     experiment = exp.Experiment(content['experiment'][0], args.patch_idx, args.patch_count)
+
     if not args.skip_experiment:
         log.print_info('Start experiments')
         if not args.dry:
