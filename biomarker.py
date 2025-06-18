@@ -440,6 +440,27 @@ class CAI_DURATION(BiomarkerBase):
         return np.mean(duration)
 
 
+class MAX_DISTANCE_DIFF(BiomarkerBase):
+    def __str__(self) -> str:
+        return 'Max_distance_diff'
+
+    def required_data(self) -> list:
+        return [TIME]
+
+    def return_type(self) -> str:
+        return utility.TIME
+
+    def calculate(self, window: Window) -> float:
+        times = []
+        for beat in window.ap_beats():
+            times.append(beat.data[TIME][0])
+
+        diff = np.diff(times)
+        amplitude = np.max(diff)-np.min(diff)
+
+        return amplitude
+
+
 class CTDN(BiomarkerBase):
     def __init__(self, N: int) -> None:
         super().__init__()
@@ -717,7 +738,8 @@ BIOMARKERS = {'MDP': MDP(),
               'APD70': APD_N(70),
               'APD80': APD_N(80),
               'APD90': APD_N(90),
-              "relaxTime50": relaxTime50()
+              'relaxTime50': relaxTime50(),
+              "Max_distance_diff": MAX_DISTANCE_DIFF(),
               }
 
 
