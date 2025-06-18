@@ -744,17 +744,19 @@ class Biomarkers:
         bio_str = ' , '.join(map(str, list(map(type, self.biomarkers))))
         return f'target: {self.target} | file: {self.file}| {bio_str}'
 
-    def _required_data_full(self) -> list:
+    @staticmethod
+    def required_data_full(biomarkers) -> list:
         required_data = []
-        for bm in self.biomarkers:
+        for bm in biomarkers:
             for data_name in bm.required_data():
                 if data_name not in required_data:
                     required_data.append(data_name)
         return required_data
 
-    def _optional_data_full(self) -> list:
+    @staticmethod
+    def optional_data_full(biomarkers) -> list:
         optional_data = []
-        for bm in self.biomarkers:
+        for bm in biomarkers:
             for data_name in bm.optional_data():
                 if data_name not in optional_data:
                     optional_data.append(data_name)
@@ -764,14 +766,14 @@ class Biomarkers:
         log.print_verbose("Find biomarkers for the following:")
         for bm in self.biomarkers:
             log.print_verbose(str(type(bm)))
-        log.print_info(f'Data is accessed with following types: `{"`, `".join(self._required_data_full())}`')
+        log.print_info(f'Data is accessed with following types: `{"`, `".join(self.required_data_full(self.biomarkers))}`')
         log.print_info(f'Using experiment: `{experiment}`')
         log.print_info(f'Would write to file: `{self.file}`')
 
     def run(self, experiment: exp.Experiment) -> None:
         # Collect list of all needed data from biomarkers
-        names_required = self._required_data_full()
-        names_optional = self._optional_data_full()
+        names_required = Biomarkers.required_data_full(self.biomarkers)
+        names_optional = Biomarkers.optional_data_full(self.biomarkers)
         header = [str(bm)+f" ({self.biomarker_units[str(bm)]})" for bm in self.biomarkers]
         all_results = []
         # get data through the experiment needed for the biomarkers
