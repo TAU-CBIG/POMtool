@@ -5,6 +5,7 @@ import shutil
 import subprocess
 import scipy.io
 import utility
+import pathlib
 
 class Model:
     def __init__(self, full_args) -> None:
@@ -75,6 +76,13 @@ class Model:
         cmd_file.write('\n')
 
         subprocess.run(' '.join(command), shell=True, cwd=current_wd, stdout=stdout_file, stderr=stderr_file)
+
+    def delete_data(self, current_wd) -> None:
+        for name in self.vals.keys():
+            if "file" in self.vals[name].keys():
+                path = current_wd / pathlib.Path(self.vals[name]["file"])
+                if path.exists():
+                    os.remove(path)
 
     def get_data(self, directory: str, required_names: list, optional_names: list) -> dict:
         ret_data = {}
