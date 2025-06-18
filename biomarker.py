@@ -1,3 +1,4 @@
+import log
 import numpy as np
 import experiment as exp
 import scipy.signal
@@ -524,7 +525,7 @@ class APD_N(BiomarkerBase):
             i += 1
 
 
-            # Debug printing if you want to check what is actually happening
+            # Debug log.print_infoing if you want to check what is actually happening
             # plt.plot(beat.data[TIME],beat.data[VM])
             # plt.plot(beat.data[TIME][beat.bot_idx], beat.data[VM][beat.bot_idx], 'x')
             # plt.plot(beat.data[TIME][beat.top_idx], beat.data[VM][beat.top_idx], 'o')
@@ -760,12 +761,12 @@ class Biomarkers:
         return optional_data
 
     def dry(self, experiment: exp.Experiment) -> None:
-        print("Find biomarkers for the following:")
+        log.print_verbose("Find biomarkers for the following:")
         for bm in self.biomarkers:
-            print(str(type(bm)))
-        print(f'Data is accessed with following types: `{"`, `".join(self._required_data_full())}`')
-        print(f'Using experiment: `{experiment}`')
-        print(f'Would write to file: `{self.file}`')
+            log.print_verbose(str(type(bm)))
+        log.print_info(f'Data is accessed with following types: `{"`, `".join(self._required_data_full())}`')
+        log.print_info(f'Using experiment: `{experiment}`')
+        log.print_info(f'Would write to file: `{self.file}`')
 
     def run(self, experiment: exp.Experiment) -> None:
         # Collect list of all needed data from biomarkers
@@ -794,9 +795,9 @@ class Biomarkers:
                 except:
                     raise KeyError(f"We do not support the requested biomarker unit '{unit}'. We support units: {list(utility.unit_to_scimath.keys())}")
 
-            # Remove following comments to print out biomarkers for each cell
+            # Remove following comments to log.print_info out biomarkers for each cell
             #for bm, result in zip(self.biomarkers, results):
-            #    print(f"{str(bm)}: {result} {self.biomarker_units[str(bm)]}")
+            #    log.print_info(f"{str(bm)}: {result} {self.biomarker_units[str(bm)]}")
 
 
             all_results.append(results)

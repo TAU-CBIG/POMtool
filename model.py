@@ -1,3 +1,4 @@
+import log
 import numpy as np
 import os
 import shutil
@@ -58,7 +59,7 @@ class Model:
 
     def dry(self, cwd, parameters) -> None:
         command = self._create_command(parameters)
-        print(f'dry run in {cwd} of\n    {" ".join(command)}')
+        log.print_info(f'dry run in {cwd} of\n    {" ".join(command)}')
 
     def run(self, current_wd, parameters) -> None:
         command = self._create_command(parameters)

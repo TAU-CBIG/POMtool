@@ -1,6 +1,7 @@
 import experiment as exp
 import biomarker as bio
 import calibration as cal
+import log
 import shutil
 import pathlib
 
@@ -23,8 +24,8 @@ class Merge:
                 copy_instructions.append([experiment.get_directory(j), experiment_base.get_directory(j)])
         if self.dry:
             for ci in copy_instructions:
-                print(f'Copy `{ci[0]}` into `{ci[1]}`')
-            print(f'Manifest({manifest_base_file}):\n  ' + '\n  '.join(manifest_files))
+                log.print_info(f'Copy `{ci[0]}` into `{ci[1]}`')
+            log.print_info(f'Manifest({manifest_base_file}):\n  ' + '\n  '.join(manifest_files))
         else:
             if pathlib.Path(experiment_base.cwd).exists():
                 if self.force:
@@ -49,7 +50,7 @@ class Merge:
             cwd = exp.Experiment(self.content['experiment'][0], i, self.patches).cwd + '/'
             biomarkers_file.append(cwd + bio.Biomarkers(self.content['biomarkers'], i, self.patches).patch_file)
         if self.dry:
-            print(f'File({biomarkers_base_file}):\n  ' + '\n  '.join(biomarkers_file))
+            log.print_info(f'File({biomarkers_base_file}):\n  ' + '\n  '.join(biomarkers_file))
         else:
             with open(biomarkers_base_file, 'w') as f:
                 header_done = False

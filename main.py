@@ -11,6 +11,7 @@ import model as mod
 import biomarker as bm
 import calibration as cal
 import sys
+import log
 
 def run_merge(arg_list):
     parser = argparse.ArgumentParser(
@@ -64,6 +65,7 @@ def run_job(arg_list):
     parser.add_argument('--config', required=True, help='Config file to do the thing')
     parser.add_argument('--dry', action='store_true',help='Run without actually doing the experiment.')
     parser.add_argument('--silent', action='store_true',help='Silent control flow printing')
+    parser.add_argument('--verbose', action='store_true',help='Allow extra verbose printing')
     parser.add_argument('--patch_count', help='Define how many patches are going to be used', default=1, metavar="N", type=int)
     parser.add_argument('--patch_idx', help='Define what patch is going to be used for this specific run, range [0,patch_count)', default=0, metavar="IDX", type=int)
     parser.add_argument('--skip-experiment', action='store_true',help='Skip experiment, it is assumed you already have run experiment')
@@ -74,12 +76,12 @@ def run_job(arg_list):
     parser.add_argument('--only-calibration', action='store_true',help='Only run calibration, assumes you have run previous steps already and have the data')
     parser.add_argument('--force', action='store_true', help='Override existing files during the experiment')
     args = parser.parse_args(arg_list)
-    def noprint(*values: object,):
-        pass
 
-    myprint = noprint if args.silent else print
+    log.INFO = not args.silent
+    log.VERBOSE = args.verbose
+
     if args.config:
-        myprint(f'Using config `{args.config}`')
+        log.print_info(f'Using config `{args.config}`')
     with open(args.config, 'r') as f:
         content = yaml.safe_load(f)
     if args.only_experiment:
@@ -94,11 +96,11 @@ def run_job(arg_list):
     models = mod.Models(content['model'])
     experiment = exp.Experiment(content['experiment'][0], args.patch_idx, args.patch_count)
     if not args.skip_experiment:
-        myprint('Start experiments')
+        log.print_info('Start experiments')
         if not args.dry:
             if pathlib.Path(experiment.cwd).exists():
                 if args.force:
-                    print("REMOVE:", experiment.cwd)
+                    log.print_verbose("REMOVE:", experiment.cwd)
                     shutil.rmtree(experiment.cwd)
                 else:
                     raise FileExistsError(f'Target directory exists `{experiment.cwd}`')
@@ -106,9 +108,9 @@ def run_job(arg_list):
             experiment.run(models)
         else:
             experiment.dry(models)
-        myprint('End experiments')
+        log.print_info('End experiments')
     if not args.skip_biomarkers:
-        myprint('Start biomarkers')
+        log.print_info('Start biomarkers')
         biomarkers = bm.Biomarkers(content['biomarkers'], args.patch_idx, args.patch_count)
         if args.skip_experiment:
             experiment.empty_run(models)
@@ -116,15 +118,15 @@ def run_job(arg_list):
             biomarkers.run(experiment)
         else:
             biomarkers.dry(experiment)
-        myprint('End biomarkers')
+        log.print_info('End biomarkers')
     if not args.skip_calibration:
-        myprint('Start calibration')
+        log.print_info('Start calibration')
         if not args.dry:
             calibration = cal.Calibration(content['calibration'], experiment, args.patch_idx, args.patch_count)
             calibration.run()
         else:
-            print(content['calibration'])
-        myprint('End calibration')
+            log.print_info(content['calibration'])
+        log.print_info('End calibration')
 
 
 def run():

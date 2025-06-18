@@ -1,3 +1,4 @@
+import log
 import model
 import numpy as np
 import scipy.stats as sstats
@@ -67,8 +68,8 @@ class Experiment:
         self._internal_run(models, nop)
 
     def dry(self, models: model.Models) -> None:
-        print(f"Manifest {self.cwd + '/' + self.manifest_file_name}: ")
-        print(self._internal_run(models, model.Model.dry))
+        log.print_info(f"Manifest {self.cwd + '/' + self.manifest_file_name}: ")
+        log.print_info(self._internal_run(models, model.Model.dry))
 
     def run(self, models: model.Models) -> None:
         manifest = self._internal_run(models, model.Model.run)
