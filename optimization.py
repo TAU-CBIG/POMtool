@@ -65,6 +65,32 @@ class Algorithm:
             self.bounds = bounds
 
 
+class NelderMead(Algorithm):
+    def __init__(self, content):
+        super().__init__(content)
+        self.xatol = check_content(content, "xatol", 1e-4)
+        self.fatol = check_content(content, "fatol", 1e-4)
+        self.maxfev = check_content(content, "maxfev", None)
+        self.options = {}
+
+    def make_options(self):
+        self.options = {"xatol": self.xatol, # Parameter tolerance
+                        "fatol": self.fatol, # Loss function tolerance
+                        "maxfev": self.maxfev, #Maximium loss function evaluations
+                        "adaptive": True, # Using adaptive Nelder-Mead (it works better for larger dimension problems)
+                        "maxiter": self.max_iter} #Maxiumium number of iterations for algorithm
+
+    def run(self, loss_func) -> scipy_optimize.OptimizeResult:
+        self.make_options()
+        result = scipy_optimize.minimize(loss_func.run_loss,
+                                         x0=self.x0,
+                                         method='Nelder-Mead',
+                                         options=self.options,
+                                         bounds=self.bounds)
+
+        return result
+
+
 class StornPrice(Algorithm):
     def __init__(self, content):
         super().__init__(content)
@@ -98,7 +124,8 @@ class StornPrice(Algorithm):
 
 
 ALGORITHMS = {
-    "StornPrice": StornPrice
+    "NelderMead": NelderMead,
+    "StornPrice": StornPrice,
 }
 
 
