@@ -1,3 +1,4 @@
 _*
 pyrightconfig.json
 .idea
+*.patch
