@@ -77,7 +77,7 @@ class LossFunction:
                 value = float('nan')
             unit = self.target_units[str(biomarkers[i])]
             return_type = biomarkers[i].return_type()
-            if unit == "default":
+            if unit == utility.DEFAULT:
                 unit = utility.default_option[return_type]
                 self.target_units[str(biomarkers[i])] = unit
                 header[i] = str(biomarkers[i])

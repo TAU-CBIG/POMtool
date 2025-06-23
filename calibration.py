@@ -144,13 +144,13 @@ class Protocol:
                 return False
         return True
 
-    def convert_ranges(self,biomarker_units: dict, ranges: dict, range_units: dict) -> tuple[dict, dict]: #convert ranges to "default" unit
+    def convert_ranges(self,biomarker_units: dict, ranges: dict, range_units: dict) -> tuple[dict, dict]: #convert ranges to the default unit
         if self.is_ranges_converted:
             return ranges, range_units
         self.is_ranges_converted = True
         for name in range_units.keys():
             unit = range_units[name]
-            if unit == "default":  # If default -> same unit as biomarker
+            if unit == utility.DEFAULT:  # If default -> same unit as biomarker
                 unit = biomarker_units[name]
             range_units[name] = unit  # Might not need this
 
@@ -160,7 +160,7 @@ class Protocol:
             ranges[name] = (min_value, max_value)
         return ranges, range_units
 
-    def convert_biomarkers(self, biomarkers: dict) -> dict: #convert biomarkers to "default" unit
+    def convert_biomarkers(self, biomarkers: dict) -> dict: #convert biomarkers to the default unit
         if self.is_biomarkers_converted:
             return biomarkers
         self.is_biomarkers_converted = True

@@ -755,7 +755,7 @@ class Biomarkers:
             if "unit" in args[i]:
                 unit = args[i]['unit']
             else:
-                unit = "default"
+                unit = utility.DEFAULT
 
             if not bio in BIOMARKERS:
                 raise ValueError(f'Unrecognized biomarker `{bio}`')
@@ -810,7 +810,7 @@ class Biomarkers:
                     value = float('nan')
                 unit = self.biomarker_units[str(self.biomarkers[i])]
                 type = self.biomarkers[i].return_type()
-                if unit == "default":
+                if unit == utility.DEFAULT:
                     unit = utility.default_option[type]
                     self.biomarker_units[str(self.biomarkers[i])] = unit
                     header[i] = str(self.biomarkers[i])+f" ({unit})"
