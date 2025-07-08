@@ -116,7 +116,24 @@ class Model:
                 item_id = value_data["id"]
                 if filename not in mat_files:
                     mat_files[filename] = scipy.io.loadmat(f'{directory}/{value_data["file"]}')
-                ret_data[name] = mat_files[filename][item_id].flatten()
+                if "col" in value_data and "row" in value_data:
+                    raise ValueError(f'Both "row" and "col" defined for val `{value_data["val"]}`.')
+                elif "col" in value_data:
+                    col = value_data["col"]
+                    ret_data[name] = mat_files[filename][item_id][:,col]
+                elif "row" in value_data:
+                    row = value_data["row"]
+                    ret_data[name] = mat_files[filename][item_id][row, :]
+                else:
+                    shape = mat_files[filename][item_id].shape
+                    if shape[0] >1 and shape[1] > 1:
+                        raise ValueError(f"File `{filename}` has data '{item_id}' that has the shape: {shape}."
+                                         f" Specify column 'col' or 'row' in data or "
+                                         f"Divide the data into their own arrays")
+                    ret_data[name] = mat_files[filename][item_id].flatten()
+                if len(ret_data[name]) < 10:
+                    log.print_once_info("Warning: Data length is less than ten, make sure your dimension are correct in the data. If you have really small data you can ignore this warning.")
+
             else:
                 raise ValueError(f'undefined method to read the data')
             if 'unit' in value_data.keys():
