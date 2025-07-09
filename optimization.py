@@ -3,6 +3,7 @@ import csv
 import loss_function
 from scipy import optimize as scipy_optimize
 import model as mod
+import log
 
 
 def check_content(content, word, default):  # Returns string/float/int/bool/None
@@ -145,6 +146,7 @@ class Optimize:
 
     def setup_loss_type(self):
         if self.loss_type in loss_function.LOSSFUNCTIONS:
+            log.print_verbose(f"Using loss type: {self.loss_type}")
             loss_func = loss_function.LOSSFUNCTIONS[self.loss_type](self.content, self.models.model(self.content["model"]))
         else:
             raise NotImplementedError(f"Loss function '{self.loss_type}' is not implemented. "
@@ -154,6 +156,7 @@ class Optimize:
     def setup_algorithm(self):
 
         if self.algorithm in ALGORITHMS:
+            log.print_verbose(f"Using algorithm: {self.algorithm}")
             return ALGORITHMS[self.algorithm](self.content)
         else:
             raise NotImplementedError(f"Algorithm '{self.algorithm}' is not implemented. Available algorithms: {list(ALGORITHMS.keys())}")
@@ -161,6 +164,7 @@ class Optimize:
 
     def save_result(self, result) -> None:
         file_name = self.content["result_file"]
+        log.print_verbose(f"Saving result to : {file_name}")
         with open(file_name, "w") as file:
             file.write(str(result))
             file.write(f"X: {result.x}, fun: {result.fun}")
