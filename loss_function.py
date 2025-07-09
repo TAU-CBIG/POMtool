@@ -5,7 +5,7 @@ import biomarker
 import numpy as np
 import utility
 import hashlib
-
+import log
 
 class LossFunction:
     def __init__(self, content: dict, model: mod.Model) -> None:
@@ -109,6 +109,8 @@ class LossFunction:
             file.write(str(loss))
 
     def run_loss(self, x: np.ndarray) -> float:
+        log.print_verbose(f"Starting loss calculation for params: {x}")
+
         dir_name = self.get_dir_name(x)
 
         # check if the calculation is already made earlier and if so use the result of that calculation
@@ -134,6 +136,8 @@ class LossFunction:
         self.save_loss(loss, dir_name)
         # Delete the generated data file
         # self.model.delete_data(dir_name)
+
+        log.print_verbose(f"Ending loss calculation for params '{x}' with loss '{loss}'")
         return loss
 
     def calculate_loss(self, biomarkers: dict) -> float:
