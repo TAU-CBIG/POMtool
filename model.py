@@ -119,10 +119,10 @@ class Model:
                 if "col" in value_data and "row" in value_data:
                     raise ValueError(f'Both "row" and "col" defined for val `{value_data["val"]}`.')
                 elif "col" in value_data:
-                    col = value_data["col"]
+                    col = value_data["col"] - 1
                     ret_data[name] = mat_files[filename][item_id][:,col]
                 elif "row" in value_data:
-                    row = value_data["row"]
+                    row = value_data["row"] - 1
                     ret_data[name] = mat_files[filename][item_id][row, :]
                 else:
                     shape = mat_files[filename][item_id].shape
