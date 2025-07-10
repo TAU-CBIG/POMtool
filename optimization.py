@@ -65,6 +65,10 @@ class Algorithm:
                 bounds.append((min_value, max_value))
             self.bounds = bounds
 
+    def run(self, loss_func, seed) -> scipy_optimize.OptimizeResult:
+        del loss_func, seed
+        raise NotImplementedError("Run is not implemented for given algorithm!")
+
 
 class NelderMead(Algorithm):
     def __init__(self, content):
