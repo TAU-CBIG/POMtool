@@ -13,6 +13,9 @@ import calibration as cal
 import sys
 import log
 import optimization
+import random
+
+default_seed = 0
 
 def run_merge(arg_list):
     parser = argparse.ArgumentParser(
@@ -77,7 +80,15 @@ def run_job(arg_list):
     parser.add_argument('--only-calibration', action='store_true',help='Only run calibration, assumes you have run previous steps already and have the data')
     parser.add_argument('--force', action='store_true', help='Override existing files during the experiment')
     parser.add_argument('--optimization', action='store_true', help='Run only the optimization. Updates given model parameters to achieve target biomarkers')
+    parser.add_argument('--seed', help=f'Select seed to be used in random number generation. Positive integer for seed, "random" for random seed. (default={default_seed})', default=default_seed, metavar="SEED", type=str)
+
     args = parser.parse_args(arg_list)
+
+    if args.seed == "random":
+        seed = random.randint(1, 2 ** 32 - 1)
+        log.print_info(f'Random seed selected: {seed}')
+    else:
+        seed = int(args.seed)
 
     log.INFO = not args.silent
     log.VERBOSE = args.verbose
@@ -100,12 +111,12 @@ def run_job(arg_list):
 
     if args.optimization:
         log.print_info("Start optimization")
-        optimization.Optimize(content['optimization'], models)
+        optimization.Optimize(content['optimization'], models, seed)
         log.print_info("End optimization")
         return
 
 
-    experiment = exp.Experiment(content['experiment'][0], args.patch_idx, args.patch_count)
+    experiment = exp.Experiment(content['experiment'][0], args.patch_idx, args.patch_count, seed)
 
     if not args.skip_experiment:
         log.print_info('Start experiments')

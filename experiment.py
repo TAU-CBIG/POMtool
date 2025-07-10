@@ -5,7 +5,7 @@ import scipy.stats as sstats
 import utility
 
 class Experiment:
-    def __init__(self, args, patch_idx: int, patch_count: int) -> None:
+    def __init__(self, args, patch_idx: int, patch_count: int, seed: int) -> None:
         self.name = args['name']
         self.id = args['id']
         self.model_id = args['model']
@@ -15,6 +15,7 @@ class Experiment:
         self.parameter_count = args['parameter_count']
         self.manifest_file_name = utility.append_patch(args['manifest'], patch_idx, patch_count)
         self.equation = args['equation'] if 'equation' in args else ""
+        self.seed = seed
         if patch_idx < 0:
             raise ValueError(f"Patch index cannot be less than zero (was `{patch_idx}`)")
         if patch_idx == patch_count:
@@ -45,7 +46,7 @@ class Experiment:
     def _generate_parameters(self) -> np.ndarray:
         x = np.ndarray([])
         if self.parametrization == 'latin_hybercube':
-            sampler = sstats.qmc.LatinHypercube(d=self.parameter_count, seed=0)
+            sampler = sstats.qmc.LatinHypercube(d=self.parameter_count, seed=self.seed)
             x = sampler.random(n=self.cells)
         else:
             raise ValueError(f'parametrization method "{self.parametrization}" not recognized')

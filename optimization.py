@@ -80,7 +80,8 @@ class NelderMead(Algorithm):
                         "adaptive": True, # Using adaptive Nelder-Mead (it works better for larger dimension problems)
                         "maxiter": self.max_iter} #Maxiumium number of iterations for algorithm
 
-    def run(self, loss_func) -> scipy_optimize.OptimizeResult:
+    def run(self, loss_func, seed) -> scipy_optimize.OptimizeResult:
+        del seed
         self.make_options()
         result = scipy_optimize.minimize(loss_func.run_loss,
                                          x0=self.x0,
@@ -105,7 +106,7 @@ class StornPrice(Algorithm):
         if self.bounds is None:
             raise KeyError("In StornPrice bounds for parameters must be defined")
 
-    def run(self, loss_func) -> scipy_optimize.OptimizeResult:
+    def run(self, loss_func, seed) -> scipy_optimize.OptimizeResult:
         # TODO: disp=True should be part of verbose printing
         self.check_bounds()
         result = scipy_optimize.differential_evolution(
@@ -119,7 +120,8 @@ class StornPrice(Algorithm):
             popsize=self.pop_size, # Population size for each generation
             polish=self.polish, # Do you call minimize function L-BFGS-B after the DE or not
             recombination=self.recombination, # Probablity for more exploration of parameters
-            tol=self.tol) # Tolerance for
+            tol=self.tol, # Relative tolerance for convergence
+            seed=seed) # Seed for random number generator
         return result
 
 
@@ -130,20 +132,20 @@ ALGORITHMS = {
 
 
 class Optimize:
-    def __init__(self, content, models: mod.Models):
+    def __init__(self, content, models: mod.Models, seed: int):
         self.content = content[0]
         self.x0 = None
         self.bounds = None
         self.algorithm = check_content(self.content, "algorithm", None)
         self.loss_type = check_content(self.content, "loss_type", None)
         self.models = models
+        self.seed = seed
 
         self.run_optimize()
 
     def setup_loss_type(self):
         if self.loss_type in loss_function.LOSSFUNCTIONS:
-            loss_func = loss_function.LOSSFUNCTIONS[self.loss_type](self.content,
-                                                                    self.models.model(self.content["model"]))
+            loss_func = loss_function.LOSSFUNCTIONS[self.loss_type](self.content, self.models.model(self.content["model"]))
         else:
             raise NotImplementedError(f"Loss function '{self.loss_type}' is not implemented. "
                                       f"Available loss functions: {list(loss_function.LOSSFUNCTIONS.keys())}")
@@ -152,15 +154,16 @@ class Optimize:
     def setup_algorithm(self):
 
         if self.algorithm in ALGORITHMS:
-            return ALGORITHMS[self.content["algorithm"]](self.content)
+            return ALGORITHMS[self.algorithm](self.content)
         else:
-            raise NotImplementedError(
-                f"Algorithm '{self.algorithm}' is not implemented. Available algorithms: {list(ALGORITHMS.keys())}")
+            raise NotImplementedError(f"Algorithm '{self.algorithm}' is not implemented. Available algorithms: {list(ALGORITHMS.keys())}")
+
 
     def save_result(self, result) -> None:
         file_name = self.content["result_file"]
         with open(file_name, "w") as file:
             file.write(str(result))
+            file.write(f"X: {result.x}, fun: {result.fun}")
 
     def run_optimize(self):
         loss_func = self.setup_loss_type()
@@ -168,5 +171,5 @@ class Optimize:
 
         algo = self.setup_algorithm()
 
-        result = algo.run(loss_func=loss_func)
+        result = algo.run(loss_func=loss_func, seed=self.seed)
         self.save_result(result)
