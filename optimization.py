@@ -108,7 +108,6 @@ class StornPrice(Algorithm):
             raise KeyError("In StornPrice bounds for parameters must be defined")
 
     def run(self, loss_func, seed) -> scipy_optimize.OptimizeResult:
-        # TODO: disp=True should be part of verbose printing
         self.check_bounds()
         result = scipy_optimize.differential_evolution(
             loss_func.run_loss,
@@ -116,7 +115,7 @@ class StornPrice(Algorithm):
             bounds=self.bounds,
             maxiter=self.max_iter, # Max num of loss function evals = pop_size*num_of_params*max_iter (before polish)
             strategy=self.strategy, # Differential evolution strategy to use
-            disp=False, # Prints best function value after each iteration
+            disp=log.VERBOSE, # Prints best function value after each iteration
             workers=self.workers, # Number of parallel processes
             popsize=self.pop_size, # Population size for each generation
             polish=self.polish, # Do you call minimize function L-BFGS-B after the DE or not
