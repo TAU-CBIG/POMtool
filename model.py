@@ -120,9 +120,13 @@ class Model:
                     raise ValueError(f'Both "row" and "col" defined for val `{value_data["val"]}`.')
                 elif "col" in value_data:
                     col = value_data["col"] - 1
+                    if col < 0 or col >= mat_files[filename][item_id].shape[1]:
+                        raise ValueError(f'Expected col range [{1}, {mat_files[filename][item_id].shape[1]}], given {value_data["col"]}')
                     ret_data[name] = mat_files[filename][item_id][:,col]
                 elif "row" in value_data:
                     row = value_data["row"] - 1
+                    if row < 0 or row >= mat_files[filename][item_id].shape[0]:
+                        raise ValueError(f'Expected row range [{1}, {mat_files[filename][item_id].shape[0]}], given {value_data["row"]}')
                     ret_data[name] = mat_files[filename][item_id][row, :]
                 else:
                     shape = mat_files[filename][item_id].shape
