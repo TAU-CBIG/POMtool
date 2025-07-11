@@ -10,7 +10,7 @@ POTENTIAL = "potential"
 LENGTH = "length"
 MOLAR = "molar"
 FREQUENCY = "frequency"
-FORCE_PER_METER = "force_per_meter"
+FORCE_PER_AREA = "force_per_area"
 UNITLESS = "unitless"
 VOLT_PER_SECOND = "volt_per_second"
 DEFAULT = "default"
@@ -22,7 +22,7 @@ base_units = {TIME: {DEFAULT: SI.second, "s": SI.second, "ms": SI.milli * SI.sec
          MOLAR: {DEFAULT: SI.mole,"mol": SI.mole, "umol" : SI.mole*SI.micro, "mmol" : SI.mole*SI.milli},
          UNITLESS : {DEFAULT: SI.none, "unitless": SI.none},
         }
-derived_units = {FORCE_PER_METER: {DEFAULT: base_units[FORCE][DEFAULT]/base_units[LENGTH][DEFAULT]**2, "mN/mm2":(SI.milli*SI.newton)/((SI.milli*SI.meter)**2)},
+derived_units = {FORCE_PER_AREA: {DEFAULT: base_units[FORCE][DEFAULT]/base_units[LENGTH][DEFAULT]**2, "mN/mm2":(SI.milli*SI.newton)/((SI.milli*SI.meter)**2)},
                 VOLT_PER_SECOND: {DEFAULT: base_units[POTENTIAL][DEFAULT]/base_units[TIME][DEFAULT], "mV/ms": (SI.milli*SI.volt)/(SI.milli*SI.second), "V/s": SI.volt / SI.second},
                     FREQUENCY: {DEFAULT: 1/base_units[TIME][DEFAULT],"Hz": 1/base_units[TIME]["s"], "bpm": 1/base_units[TIME]["min"]},
                   }

@@ -606,7 +606,7 @@ class peakTension(BiomarkerBase):
         return [FORCE]
 
     def return_type(self) -> str:
-        return utility.FORCE_PER_METER
+        return utility.FORCE_PER_AREA
 
     def calculate(self, window: Window) -> float:
         maxtension = []
