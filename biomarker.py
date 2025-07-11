@@ -658,9 +658,9 @@ class relaxTime50(BiomarkerBase):
         relaxTime50Buf = np.zeros(window.beat_count-1)
         i = 0
 
-        stepTol = 0.5e-4
-        maxTol = 5e-4
-        minTol = 1e-4
+        stepTol = utility.convert_to_default(0.5e-4, "mN/mm2")
+        maxTol = utility.convert_to_default(5e-4, "mN/mm2")
+        minTol = utility.convert_to_default(1e-4, "mN/mm2")
 
 
         for beat_idx in range(window.beat_count-1):
