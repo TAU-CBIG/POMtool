@@ -7,6 +7,7 @@ def append_patch(name, id, count) -> str:
 FORCE = "Force"
 TIME = "time"
 POTENTIAL = "potential"
+CURRENT = "current"
 LENGTH = "length"
 MOLAR = "molar"
 FREQUENCY = "frequency"
@@ -17,6 +18,7 @@ DEFAULT = "default"
 
 base_units = {TIME: {DEFAULT: SI.second, "s": SI.second, "ms": SI.milli * SI.second, "min": 60 * SI.second},
          POTENTIAL: {DEFAULT: SI.volt, "V": SI.volt, "mV": SI.volt*SI.milli, "uV": SI.micro*SI.volt},
+         CURRENT: {DEFAULT: SI.ampere, "A": SI.ampere, "mA": SI.milli*SI.ampere, "uA": SI.micro*SI.ampere},
          FORCE: {DEFAULT: SI.newton,"N": SI.newton, "mN": SI.milli*SI.newton},
          LENGTH: {DEFAULT: SI.meter,'m': SI.meter, "mm": SI.milli*SI.meter},
          MOLAR: {DEFAULT: SI.mole,"mol": SI.mole, "umol" : SI.mole*SI.micro, "mmol" : SI.mole*SI.milli},
