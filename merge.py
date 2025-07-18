@@ -13,12 +13,12 @@ class Merge:
         self.dry = dry
 
     def merge_experiments(self) -> None:
-        experiment_base = exp.Experiment(self.content['experiment'][0], 0, 1)
+        experiment_base = exp.Experiment(self.content['experiment'][0], 0, 1, 0)
         copy_instructions = []
         manifest_files = []
         manifest_base_file = experiment_base.cwd + '/' + experiment_base.manifest_file_name
         for i in range(self.patches):
-            experiment = exp.Experiment(self.content['experiment'][0], i, self.patches)
+            experiment = exp.Experiment(self.content['experiment'][0], i, self.patches, 0)
             manifest_files.append(experiment.cwd + '/' + experiment.manifest_file_name)
             for j in experiment.patch:
                 copy_instructions.append([experiment.get_directory(j), experiment_base.get_directory(j)])
@@ -43,11 +43,11 @@ class Merge:
 
         
     def merge_biomarkers(self) -> None:
-        cwd_base = exp.Experiment(self.content['experiment'][0], 0, 1).cwd + '/'
+        cwd_base = exp.Experiment(self.content['experiment'][0], 0, 1, 0).cwd + '/'
         biomarkers_base_file = cwd_base + bio.Biomarkers(self.content['biomarkers'], 0, 1).patch_file
         biomarkers_file = []
         for i in range(self.patches):
-            cwd = exp.Experiment(self.content['experiment'][0], i, self.patches).cwd + '/'
+            cwd = exp.Experiment(self.content['experiment'][0], i, self.patches, 0).cwd + '/'
             biomarkers_file.append(cwd + bio.Biomarkers(self.content['biomarkers'], i, self.patches).patch_file)
         if self.dry:
             log.print_info(f'File({biomarkers_base_file}):\n  ' + '\n  '.join(biomarkers_file))
