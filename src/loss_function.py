@@ -1,11 +1,11 @@
+from . import model as mod
+from . import biomarker
+from . import utility
+from . import log
 import csv
 import pathlib
-import model as mod
-import biomarker
 import numpy as np
-import utility
 import hashlib
-import log
 
 class LossFunction:
     def __init__(self, content: dict, model: mod.Model) -> None:

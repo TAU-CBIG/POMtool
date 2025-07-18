@@ -1,8 +1,8 @@
-import log
-import model
+from . import log
+from . import model
 import numpy as np
 import scipy.stats as sstats
-import utility
+from . import utility
 
 class Experiment:
     def __init__(self, args, patch_idx: int, patch_count: int, seed: int) -> None:

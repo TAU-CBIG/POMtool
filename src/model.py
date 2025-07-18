@@ -1,10 +1,10 @@
-import log
+from . import log
+from . import utility
 import numpy as np
 import os
 import shutil
 import subprocess
 import scipy.io
-import utility
 import pathlib
 
 class Model:

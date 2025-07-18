@@ -1,18 +1,18 @@
 #!/usr/bin/env python3
 
+#import matplotlib.pyplot as plt # temp debug
+from . import merge
+from . import experiment as exp
+from . import model as mod
+from . import biomarker as bm
+from . import calibration as cal
+from . import log
+from . import optimization
 import argparse
 import pathlib
 import shutil
 import yaml
-#import matplotlib.pyplot as plt # temp debug
-import merge
-import experiment as exp
-import model as mod
-import biomarker as bm
-import calibration as cal
 import sys
-import log
-import optimization
 import random
 
 default_seed = 0

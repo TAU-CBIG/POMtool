@@ -1,8 +1,7 @@
-import experiment as exp
-import biomarker as bio
-import calibration as cal
-from utility import append_patch
-import log
+from . import experiment as exp
+from . import biomarker as bio
+from . import utility
+from . import log
 import shutil
 import pathlib
 
@@ -77,7 +76,7 @@ class Merge:
         for i in range(self.patches):
             cwd = exp.Experiment(self.content['experiment'][0], i, self.patches, 0).cwd + '/'
             for file in files:
-                patch_path = append_patch(cwd+file, i, self.patches)
+                patch_path = utility.append_patch(cwd+file, i, self.patches)
                 new_path = cwd_base + file
                 with open(patch_path, 'r') as patch_file:
                     with open(new_path, 'a') as new_file:

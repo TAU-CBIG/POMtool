@@ -1,9 +1,9 @@
-import log
-import numpy as np
-import experiment as exp
+from . import log
+from . import experiment as exp
+from . import utility
 import scipy.signal
-#import matplotlib.pyplot as plt # temp debug
-import utility
+import numpy as np
+# import matplotlib.pyplot as plt # for debugging, should not be in requirements
 
 TIME = 'time'
 VM = 'Vm'

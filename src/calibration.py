@@ -1,8 +1,8 @@
 import csv
 import math
 import pathlib
-import utility
-import experiment as exp
+from . import utility
+from . import experiment as exp
 
 
 def convert_to_default(value: float, unit: str):

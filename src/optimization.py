@@ -1,9 +1,9 @@
+from . import loss_function
+from . import model as mod
+from . import log
+from scipy import optimize as scipy_optimize
 import numpy as np
 import csv
-import loss_function
-from scipy import optimize as scipy_optimize
-import model as mod
-import log
 
 
 def check_content(content, word, default):  # Returns string/float/int/bool/None
