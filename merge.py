@@ -1,6 +1,7 @@
 import experiment as exp
 import biomarker as bio
 import calibration as cal
+from utility import append_patch
 import log
 import shutil
 import pathlib
@@ -64,5 +65,20 @@ class Merge:
 
 
     def merge_calibration(self) -> None:
-        raise NotImplementedError("Calibration merge has not yet been implemented")
+        files = []
+        for val in self.content['calibration']:
+            if 'fail_path' in val:
+                files.append(val['fail_path'])
+            if 'success_path' in val:
+                files.append(val['success_path'])
 
+        cwd_base = exp.Experiment(self.content['experiment'][0], 0, 1, 0).cwd + '/'
+
+        for i in range(self.patches):
+            cwd = exp.Experiment(self.content['experiment'][0], i, self.patches, 0).cwd + '/'
+            for file in files:
+                patch_path = append_patch(cwd+file, i, self.patches)
+                new_path = cwd_base + file
+                with open(patch_path, 'r') as patch_file:
+                    with open(new_path, 'a') as new_file:
+                        new_file.write(patch_file.read())
