@@ -1,0 +1,3 @@
+[submodule "examples/ex1-matlab-Forouzandehmehr2024/Forouzandehmehr2024-hiPSC-CMs-Model-hiMCES"]
+	path = examples/ex1-matlab-Forouzandehmehr2024/Forouzandehmehr2024-hiPSC-CMs-Model-hiMCES
+	url = https://github.com/aminforouzandehmehr/Forouzandehmehr2024-hiPSC-CMs-Model-hiMCES
