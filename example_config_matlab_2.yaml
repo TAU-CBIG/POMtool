@@ -119,7 +119,7 @@ optimization:
   dir_name: "runs" #required: Directory in cwd, where the each individual run is stored
   loss_type: "mse" #required, Loss (fitness/energy) function used. Options: "mse"
   target_file: "example_target.csv" #required (for mse): target biomarkers to calculate loss
-  num_of_params: 5 # required
+  parameter_count: 5 # required
   algorithm: "StornPrice" #required, parameter update algorithm for optimization. Options: "StornPrice"
   bounds_file: "example_bounds.csv" #optional: limits for parameter values. Optionality depends on algorithm.
   x0: "example_x0.csv" #required, start point for optimization (recommended to have sane value)

@@ -26,9 +26,9 @@ class Algorithm:
     def setup_x0(self) -> None:
         if "x0" not in self.content.keys():
             raise KeyError("Could not find 'x0' in config")
-        if "num_of_params" not in self.content.keys():
-            raise KeyError("Could not find 'num_of_params' in config")
-        num_of_params = self.content["num_of_params"]
+        if "parameter_count" not in self.content.keys():
+            raise KeyError("Could not find 'parameter_count' in config")
+        num_of_params = self.content["parameter_count"]
         with open(self.content["x0"]) as csvfile:  # for param limits
             reader = csv.reader(csvfile)
             x0 = []
