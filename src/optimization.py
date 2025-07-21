@@ -170,7 +170,7 @@ class Optimize:
         log.print_verbose(f"Saving result to : {file_name}")
         with open(file_name, "w") as file:
             file.write(str(result))
-            file.write(f"X: {result.x}, fun: {result.fun}")
+            file.write(f"X: {result.x}, fun: {result.fun}\n")
 
     def run_optimize(self):
         loss_func = self.setup_loss_type()
