@@ -6,10 +6,19 @@ This is CLI-tool to create population of model and calibrate your model. It can 
 ## Using
 Currently, just clone the repository and run:
 ```
-./main.py run --config my_config.yaml
+./POMTool.py run --config my_config.yaml
 ```
+Use -h to get help-file for the CLI.
 
-Look at example files to create your own config. First make sure you are able to run your model in command line. Then insert those instruction over one of example configs available.
+Every config should describe model. This section describes how model you are interested can be run and how to input parameters to it.
+
+You have two options what to do with model, you can run POM-experiment (experiment), or model optimization (optimization).
+
+In POM-experiment first model is run for each set of parameters as described in `experiment`. After that `biomarkers` are calculated. With biomarkers, we can calibrate our population based on protocols described in `calibration`.
+
+In optimization, parameters are changed with goal to match biomarkers given as arguments. Biomarkers are calculated as given in `biomarkers` and `optimization` describes optimization process.
+
+To create your own config, check examples directory. All examples there are runnable (at moment of writing, only one example). 
 
 ## Future
 * More ways to use the tool will be made available as the project progresses
