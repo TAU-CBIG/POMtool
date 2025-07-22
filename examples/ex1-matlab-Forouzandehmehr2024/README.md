@@ -32,4 +32,4 @@ Then we continue our running without patches:
 
 # Optimization
 We can also optimize parameters instead of creating and calibrating model. 
-`../../POMtool.py --config matlab_config.yaml --skip-experiment --patch_count=3`
+`../../POMtool.py --config matlab_config.yaml --optimization`
