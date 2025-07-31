@@ -136,7 +136,7 @@ class Window:
             now_values = cai[:-lag]
 
             location = np.argwhere(lag_values >= now_values*threshold)
-            beat.mcp_idx = int(location[0])
+            beat.mcp_idx = location[0][0]
 
 
 class BiomarkerBase:
