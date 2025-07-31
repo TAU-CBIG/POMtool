@@ -73,6 +73,10 @@ class Experiment:
         log.print_info(self._internal_run(models, model.Model.dry))
 
     def run(self, models: model.Models) -> None:
+        if not self.patch:
+            log.print_info("Patch has no job")
+            return
+
         manifest = self._internal_run(models, model.Model.run)
         with open(self.cwd + '/' + self.manifest_file_name, 'w') as f:
             f.write(manifest)

@@ -8,16 +8,18 @@ import pathlib
 class Merge:
     def __init__(self, content, patches, force, dry) -> None:
         self.content = content
-        self.patches = patches
+        self.patches = patches # expected patches based on given arguments
+        self.actual_patches = patches # Actual computed patches
         self.force = force
         self.dry = dry
 
     def merge_experiments(self) -> None:
         experiment_base = exp.Experiment(self.content['experiment'][0], 0, 1, 0)
+        self.actual_patches = min(self.patches, experiment_base.patch.stop)
         copy_instructions = []
         manifest_files = []
         manifest_base_file = experiment_base.cwd + '/' + experiment_base.manifest_file_name
-        for i in range(self.patches):
+        for i in range(self.actual_patches):
             experiment = exp.Experiment(self.content['experiment'][0], i, self.patches, 0)
             manifest_files.append(experiment.cwd + '/' + experiment.manifest_file_name)
             for j in experiment.patch:
@@ -43,10 +45,12 @@ class Merge:
 
         
     def merge_biomarkers(self) -> None:
-        cwd_base = exp.Experiment(self.content['experiment'][0], 0, 1, 0).cwd + '/'
+        experiment = exp.Experiment(self.content['experiment'][0], 0, 1, 0)
+        self.actual_patches = min(self.patches, experiment.patch.stop)
+        cwd_base = experiment.cwd + '/'
         biomarkers_base_file = cwd_base + bio.Biomarkers(self.content['biomarkers'], 0, 1).patch_file
         biomarkers_file = []
-        for i in range(self.patches):
+        for i in range(self.actual_patches):
             cwd = exp.Experiment(self.content['experiment'][0], i, self.patches, 0).cwd + '/'
             biomarkers_file.append(cwd + bio.Biomarkers(self.content['biomarkers'], i, self.patches).patch_file)
         if self.dry:
@@ -71,9 +75,11 @@ class Merge:
             if 'success_path' in val:
                 files.append(val['success_path'])
 
-        cwd_base = exp.Experiment(self.content['experiment'][0], 0, 1, 0).cwd + '/'
+        experiment = exp.Experiment(self.content['experiment'][0], 0, 1, 0)
+        self.actual_patches = min(self.patches, experiment.patch.stop)
+        cwd_base = experiment.cwd + '/'
 
-        for i in range(self.patches):
+        for i in range(self.actual_patches):
             cwd = exp.Experiment(self.content['experiment'][0], i, self.patches, 0).cwd + '/'
             for file in files:
                 patch_path = utility.append_patch(cwd+file, i, self.patches)
