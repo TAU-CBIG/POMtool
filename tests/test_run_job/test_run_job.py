@@ -64,3 +64,18 @@ def test_run_cells_cmd():
                                                      patch_idx=0)
 
     assert cmds_gold == cmds_lead
+
+
+def test_run_cells_stderr():
+    stderr_gold = run_job_utility.get_subdir_cell_data(config="test_config_run_job.yaml",
+                                                       folder_type=run_job_utility.GOLD,
+                                                       file="stderr.txt",
+                                                       patch_count=1,
+                                                       patch_idx=0)
+    stderr_lead = run_job_utility.get_subdir_cell_data(config="test_config_run_job.yaml",
+                                                       folder_type=run_job_utility.LEAD,
+                                                       file="stderr.txt",
+                                                       patch_count=1,
+                                                       patch_idx=0)
+
+    assert stderr_gold == stderr_lead
