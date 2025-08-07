@@ -1,0 +1,113 @@
+# `model` describes how model should be run
+model:
+- id: "my_matlab_model" # id
+  exec: "matlab" # Executable used to run out model
+  param_key: "%#%" # Key used to define our paramters
+- par: -batch "tic;addpath('../../../../../examples/ex1-matlab-Forouzandehmehr2024/Forouzandehmehr2024-hiPSC-CMs-Model-hiMCES'); [val, time] = run_hiMCES(result = 'Vm, Cai, AT, Lsarc', simTime=11, stimFlag=1, override_file='Yss.mat', tau_m_factor=%1%, g_f_factor=%2%, g_CaL_factor=%3%, g_to_factor=%4%, g_PCa_factor=%5%); save('res.mat');toc;" # Our matlab code to do single run of our model, %#% is replaced with parameter.
+- val: "time" # Name for value. This is internal name, mandatory.
+  unit: "s" # Unit used
+  method: "matlab" # Method we are using to load the value. We used matlab `save` to store our values-> matlab
+  file: "res.mat" # Filename
+  id: "time" # Id ([val, time] so this is what we had in time)
+- val: "Vm" # Name for value. This is internal name, required for biomarkers using it.
+  unit: "V" # Unit used
+  method: "matlab" # We saved with matlab `save`, so we use method matlab
+  file: "res.mat" # Filename
+  id: "val" # Id ([val, time] so this is what we had in val)
+  col: 1 # Column data is stored. For 1d-array this is not needed, but for 2D , we need to specify what data we are intersted of. use `row` instead, if your data is stored in rows
+- val: "Cai" # Similar to Vm
+  unit: "mmol"
+  method: "matlab"
+  file: "res.mat"
+  id: "val"
+  col: 2
+- val: "Force" # Similar to Vm
+  unit: "mN/mm2"
+  method: "matlab"
+  file: "res.mat"
+  id: "val"
+  col: 3
+- val: "Lsarc" # Similar to Vm
+  unit: "mol"
+  method: "matlab"
+  file: "res.mat"
+  id: "val"
+  col: 4
+- val: "Istim" # Similar to Vm, except we do not need unit, as only steps are detected to determine beat, if steps present.
+  method: "matlab"
+  file: "res.mat"
+  id: "val"
+  col: 5
+
+# `experiment` describes how model should be run and with what parameters
+experiment:
+- name: "cell_#" # '#' is to be replaced with id-number for our directory names
+  id: "latin"
+  cwd: "run_job" # base directroy where our results will be storeds
+  model: "my_matlab_model" # model we are going to use
+  parametrization: "latin_hybercube" # parameterization scheme, produces latin hybercube sampling (range [0, 1])
+  cells: 5 # How many cells we want to create population of (10 is small, is only used as example)
+  parameter_count: 5 # parameters in model
+  equation: "5*x" # We apply this equation to the parameters, moving those to range 0.5-2.0. We can use numpy functions here, x is the original parameter
+  manifest: "simulation_manifest.csv" # name of the manifest. It will contain what parameters were given to the command
+
+# `biomarkers` list biomarkers that should be calculated
+biomarkers:
+- target: "mylatin"
+  file: "biomarkers.csv" # Result file where we collect our biomarkers, both inside single directory and as collection in experiment root
+- biomarker: "MDP"
+  unit: "default" # This is default value
+- biomarker: "APD90"
+  unit: "ms"
+- biomarker: "APD50"
+  unit: "ms"
+- biomarker: "APD60"
+- biomarker: "dv_dt_max"
+  unit: "V/s"
+- biomarker: "Max_Cai"
+  unit: "mmol"
+- biomarker: "Min_Cai"
+  unit: "mmol"
+- biomarker: "Rate_Cai"
+  unit: "Hz"
+- biomarker: "CL"
+  unit: "ms"
+- biomarker: "APA"
+  unit: "mV"
+- biomarker: "Peak"
+  unit: "mV"
+- biomarker: "RT1050"
+  unit: "ms"
+- biomarker: "RT1090"
+  unit: "ms"
+- biomarker: "DT9010"
+  unit: "ms"
+- biomarker: "RT10Peak"
+  unit: "ms"
+- biomarker: "CAI_DURATION"
+  unit: "ms"
+- biomarker: "CTD30"
+  unit: "ms"
+- biomarker: "CTD50"
+  unit: "ms"
+- biomarker: "CTD90"
+  unit: "ms"
+- biomarker: "Rate_AP"
+  unit: "bpm"
+- biomarker: "RAPP_APD"
+  unit: "unitless"
+- biomarker: "Max_distance_diff"
+- biomarker: "peakTension"
+  unit: "mN/mm2"
+- biomarker: "cellShortPerc"
+  unit: "unitless"
+
+# Contains list of calibrations that should be run
+calibration:
+- file: "biomarkers.csv" # File used for calibration
+- protocol: "nonan" # calibration condition, basic check, checks if nan or inf
+  fail_path: "discarded_because_of_nans.csv" # If check fails, (ie. there ara nan/inf values)
+- protocol: "range" # calibration condition, check against biomarkers
+  input_data_path: "biomarker_range.csv" # biomarker ranges
+  fail_path: "discarded.csv"
+  success_path: "success.csv" # results passing this protocol are saved here

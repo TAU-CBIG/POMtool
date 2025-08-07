@@ -1,0 +1,11 @@
+import run_job_utility
+
+
+def test_biomarkers():
+    lead = run_job_utility.get_lead(file="run_job/biomarkers.csv",
+                                    config="test_config_run_job.yaml",
+                                    patch_count=1,
+                                    patch_idx=0)
+    gold = run_job_utility.get_gold(file="run_job/biomarkers.csv")
+
+    assert gold == lead
