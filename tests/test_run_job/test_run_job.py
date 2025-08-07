@@ -116,3 +116,13 @@ def test_correct_order():  # Same as test_used_all_generated_params except witho
     used_params = run_job_utility.get_params_from_text(cmds_lead_combined)
 
     assert gen_params == used_params
+
+
+def test_unique_params():
+    manifest = run_job_utility.get_lead(file="run_job/simulation_manifest.csv",
+                                        config="test_config_run_job.yaml",
+                                        patch_count=1,
+                                        patch_idx=0)
+    gen_params = run_job_utility.get_params_from_text(manifest)
+
+    assert len(gen_params) == len(set(gen_params))
