@@ -126,3 +126,12 @@ def test_unique_params():
     gen_params = run_job_utility.get_params_from_text(manifest)
 
     assert len(gen_params) == len(set(gen_params))
+
+
+def test_naming():
+    lead = run_job_utility.get_lead(file="run_job-1-5/biomarkers.csv-1-5",
+                                    config="test_config_run_job.yaml",
+                                    patch_count=5,
+                                    patch_idx=0)
+    gold = run_job_utility.get_gold(file="run_job-1-5/biomarkers.csv-1-5")
+    assert lead == gold
