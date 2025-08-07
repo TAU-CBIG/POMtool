@@ -79,3 +79,22 @@ def test_run_cells_stderr():
                                                        patch_idx=0)
 
     assert stderr_gold == stderr_lead
+
+
+def test_used_all_generated_params():  # Checks only if all the elements were used. Does not care about order
+    manifest = run_job_utility.get_lead(file="run_job/simulation_manifest.csv",
+                                        config="test_config_run_job.yaml",
+                                        patch_count=1,
+                                        patch_idx=0)
+    cmds_lead = run_job_utility.get_subdir_cell_data(config="test_config_run_job.yaml",
+                                                     folder_type=run_job_utility.LEAD,
+                                                     file="cmd.txt",
+                                                     patch_count=1,
+                                                     patch_idx=0)
+
+    cmds_lead_combined = run_job_utility.dict_to_text(cmds_lead)
+
+    gen_params = run_job_utility.get_params_from_text(manifest)
+    used_params = run_job_utility.get_params_from_text(cmds_lead_combined)
+
+    assert sorted(gen_params) == sorted(used_params)

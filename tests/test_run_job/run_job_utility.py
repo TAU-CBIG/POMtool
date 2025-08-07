@@ -6,6 +6,7 @@ import pathlib
 import yaml
 import os
 import shutil
+import re
 
 GOLD = "gold"
 LEAD = "lead"
@@ -85,3 +86,17 @@ def get_subdir_cell_data(config, file, folder_type, patch_count=1,
     if failed_files:
         raise FileNotFoundError(f"{len(failed_files)} gold files failed to load: `{'´, ´'.join(failed_files)}`")
     return subdir_data
+
+
+def dict_to_text(dictionary):
+    all_text = ""
+    for cmd in dictionary.values():
+        all_text = all_text + " " + cmd
+
+    return all_text
+
+
+def get_params_from_text(text) -> list:
+    # Matches to "number.number"
+    params = re.findall("[0-9]{1,}\\.[0-9]{1,}", text)
+    return params
