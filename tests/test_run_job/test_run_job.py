@@ -39,3 +39,13 @@ def test_success():
     gold = run_job_utility.get_gold(file="run_job/success.csv")
 
     assert gold == lead
+
+
+def test_simulation_manifest():
+    lead = run_job_utility.get_lead(file="run_job/simulation_manifest.csv",
+                                    config="test_config_run_job.yaml",
+                                    patch_count=1,
+                                    patch_idx=0)
+    gold = run_job_utility.get_gold(file="run_job/simulation_manifest.csv")
+
+    assert gold == lead
