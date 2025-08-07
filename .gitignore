@@ -2,3 +2,5 @@ _*
 pyrightconfig.json
 .idea
 *.patch
+tests/data/gold/logs.txt
+tests/data/lead
