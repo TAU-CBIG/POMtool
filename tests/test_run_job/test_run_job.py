@@ -1,7 +1,7 @@
 import run_job_utility
 
 
-def test_biomarkers():
+def test_biomarkers(job_session_fixture):
     lead = run_job_utility.get_lead(file="run_job/biomarkers.csv",
                                     config="test_config_run_job.yaml",
                                     patch_count=1,
@@ -11,7 +11,7 @@ def test_biomarkers():
     assert gold == lead
 
 
-def test_discarded():
+def test_discarded(job_session_fixture):
     lead = run_job_utility.get_lead(file="run_job/discarded.csv",
                                     config="test_config_run_job.yaml",
                                     patch_count=1,
@@ -21,7 +21,7 @@ def test_discarded():
     assert gold == lead
 
 
-def test_discarded_because_of_nans():
+def test_discarded_because_of_nans(job_session_fixture):
     lead = run_job_utility.get_lead(file="run_job/discarded_because_of_nans.csv",
                                     config="test_config_run_job.yaml",
                                     patch_count=1,
@@ -31,7 +31,7 @@ def test_discarded_because_of_nans():
     assert gold == lead
 
 
-def test_success():
+def test_success(job_session_fixture):
     lead = run_job_utility.get_lead(file="run_job/success.csv",
                                     config="test_config_run_job.yaml",
                                     patch_count=1,
@@ -41,7 +41,7 @@ def test_success():
     assert gold == lead
 
 
-def test_simulation_manifest():
+def test_simulation_manifest(job_session_fixture):
     lead = run_job_utility.get_lead(file="run_job/simulation_manifest.csv",
                                     config="test_config_run_job.yaml",
                                     patch_count=1,
@@ -51,7 +51,7 @@ def test_simulation_manifest():
     assert gold == lead
 
 
-def test_run_cells_cmd():
+def test_run_cells_cmd(job_session_fixture):
     cmds_gold = run_job_utility.get_subdir_cell_data(config="test_config_run_job.yaml",
                                                      folder_type=run_job_utility.GOLD,
                                                      file="cmd.txt",
@@ -66,7 +66,7 @@ def test_run_cells_cmd():
     assert cmds_gold == cmds_lead
 
 
-def test_run_cells_stderr():
+def test_run_cells_stderr(job_session_fixture):
     stderr_gold = run_job_utility.get_subdir_cell_data(config="test_config_run_job.yaml",
                                                        folder_type=run_job_utility.GOLD,
                                                        file="stderr.txt",
@@ -81,7 +81,8 @@ def test_run_cells_stderr():
     assert stderr_gold == stderr_lead
 
 
-def test_used_all_generated_params():  # Checks only if all the elements were used. Does not care about order
+def test_used_all_generated_params(
+        job_session_fixture):  # Checks only if all the elements were used. Does not care about order
     manifest = run_job_utility.get_lead(file="run_job/simulation_manifest.csv",
                                         config="test_config_run_job.yaml",
                                         patch_count=1,
@@ -100,7 +101,7 @@ def test_used_all_generated_params():  # Checks only if all the elements were us
     assert sorted(gen_params) == sorted(used_params)
 
 
-def test_correct_order():  # Same as test_used_all_generated_params except without sorting
+def test_correct_order(job_session_fixture):  # Same as test_used_all_generated_params except without sorting
     manifest = run_job_utility.get_lead(file="run_job/simulation_manifest.csv",
                                         config="test_config_run_job.yaml",
                                         patch_count=1,
@@ -118,7 +119,7 @@ def test_correct_order():  # Same as test_used_all_generated_params except witho
     assert gen_params == used_params
 
 
-def test_unique_params():
+def test_unique_params(job_session_fixture):
     manifest = run_job_utility.get_lead(file="run_job/simulation_manifest.csv",
                                         config="test_config_run_job.yaml",
                                         patch_count=1,
@@ -128,7 +129,7 @@ def test_unique_params():
     assert len(gen_params) == len(set(gen_params))
 
 
-def test_naming():
+def test_naming(job_session_fixture):
     lead = run_job_utility.get_lead(file="run_job-1-5/biomarkers.csv-1-5",
                                     config="test_config_run_job.yaml",
                                     patch_count=5,

@@ -8,6 +8,7 @@ import os
 import shutil
 import re
 
+skip = False
 GOLD = "gold"
 LEAD = "lead"
 EXPERIMENT = "experiment"
@@ -29,8 +30,8 @@ def get_lead(config, file, patch_count=1, patch_idx=0) -> str:
     argument = [f"--config={config}", f"--force", f"--patch_count={patch_count}", f"--patch_idx={patch_idx}",
                 "--silent"]
 
-    if argument not in ALREADY_RAN:
-        # this is because of a bug: cwd should always be where --config=foo.yaml is -> fix this at some point
+    if not skip and argument not in ALREADY_RAN:
+        #this is because of a bug: cwd should always be where --config=foo.yaml is -> fix this at some point
         shutil.copytree(original_path, dir_lead, dirs_exist_ok=True)
         try:
             os.chdir(dir_lead)
