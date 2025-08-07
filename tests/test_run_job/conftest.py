@@ -5,6 +5,7 @@ import run_job_utility
 def pytest_addoption(parser):
     parser.addoption("--skip-lead", action="store_true", help="A custom option for pytest")
     parser.addoption("--make-gold", action="store_true", help="A custom option for pytest")
+    parser.addoption("--delete-gold", action="store_true", help="A custom option for pytest")
 
 
 @pytest.fixture(scope='session')
@@ -16,3 +17,8 @@ def job_session_fixture(request):
     if make_gold:
         for f in set(run_job_utility.gold_files):
             run_job_utility.make_gold_file(f)
+
+    delete_gold = (request.config.getoption("--delete-gold"))
+    if delete_gold:
+        for f in set(run_job_utility.gold_files):
+            run_job_utility.delete_gold_file(f)

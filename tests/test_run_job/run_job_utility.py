@@ -139,3 +139,10 @@ def make_gold_file(file: str):
     else:
         log_gold(file_gold, function="Add")
     shutil.copy(file_lead, file_gold)
+
+
+def delete_gold_file(file: str):
+    file_gold = pathlib.Path("../data/gold/" + file)
+    if file_gold.exists():
+        os.remove(file_gold)
+        log_gold(file_gold, function="Del")
