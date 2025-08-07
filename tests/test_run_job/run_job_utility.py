@@ -3,8 +3,16 @@ import sys
 sys.path.append('../..')
 import src.main
 import pathlib
+import yaml
 import os
 import shutil
+
+GOLD = "gold"
+LEAD = "lead"
+EXPERIMENT = "experiment"
+CWD = "cwd"
+NAME = "name"
+CELLS = "cells"
 
 ALREADY_RAN = []
 
@@ -43,3 +51,37 @@ def get_gold(file) -> str:
 
     data = file_gold.read_text()
     return data
+
+
+def get_config_content(config, section, key):
+    with open(config, 'r') as f:
+        content = yaml.safe_load(f)
+    info = content[section][0][key]
+    return info
+
+
+def get_subdir_cell_data(config, file, folder_type, patch_count=1,
+                         patch_idx=0):
+    num_of_cells = get_config_content(config=config, section=EXPERIMENT, key=CELLS)
+    subdir_name = get_config_content(config=config, section=EXPERIMENT, key=NAME)[:-1]  # Get the place of number out
+    cwd = get_config_content(config=config, section=EXPERIMENT, key=CWD)
+    subdir_data = {}
+    failed_files = []
+    for cell in range(num_of_cells):
+        cell += 1
+        file_path = f"{cwd}/{subdir_name}{cell}/{file}"
+        if folder_type == LEAD:
+            type_file = get_lead(config=config, file=file_path, patch_count=patch_count, patch_idx=patch_idx)
+        elif folder_type == GOLD:
+            try:
+                type_file = get_gold(file=file_path)
+            except FileNotFoundError as e:
+                failed_files.append(file_path)
+                type_file = None
+        else:
+            raise NotImplementedError(f"Not implemented type: {folder_type}")
+
+        subdir_data[cell] = type_file
+    if failed_files:
+        raise FileNotFoundError(f"{len(failed_files)} gold files failed to load: `{'´, ´'.join(failed_files)}`")
+    return subdir_data

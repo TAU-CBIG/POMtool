@@ -49,3 +49,18 @@ def test_simulation_manifest():
     gold = run_job_utility.get_gold(file="run_job/simulation_manifest.csv")
 
     assert gold == lead
+
+
+def test_run_cells_cmd():
+    cmds_gold = run_job_utility.get_subdir_cell_data(config="test_config_run_job.yaml",
+                                                     folder_type=run_job_utility.GOLD,
+                                                     file="cmd.txt",
+                                                     patch_count=1,
+                                                     patch_idx=0)
+    cmds_lead = run_job_utility.get_subdir_cell_data(config="test_config_run_job.yaml",
+                                                     folder_type=run_job_utility.LEAD,
+                                                     file="cmd.txt",
+                                                     patch_count=1,
+                                                     patch_idx=0)
+
+    assert cmds_gold == cmds_lead
