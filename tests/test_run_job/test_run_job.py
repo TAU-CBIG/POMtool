@@ -154,3 +154,23 @@ def test_patch(job_session_fixture):
                                      patch_idx=i) for i in range(0, 5)]
 
     assert gold == lead
+
+
+def test_merge(job_session_fixture):
+    gold = run_job_utility.get_lead(file="run_job/simulation_manifest.csv",
+                                    config="test_config.yaml",
+                                    cwd="run_job",
+                                    patch_count=1,
+                                    patch_idx=0)
+
+    ensure = [run_job_utility.get_lead(file=f"run_job_patch-{i + 1}-5/simulation_manifest.csv-{i + 1}-5",
+                                       config="test_config.yaml",
+                                       cwd="run_job_patch",
+                                       patch_count=5,
+                                       patch_idx=i) for i in range(0, 5)]
+
+    lead = run_job_utility.get_lead_merge(file="run_job/simulation_manifest.csv",
+                                          config="test_config.yaml",
+                                          cwd="run_job_patch",
+                                          patch_count=5)
+    assert gold == lead

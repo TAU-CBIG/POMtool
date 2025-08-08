@@ -33,6 +33,34 @@ def copy_config(config: pathlib.Path, path) -> None:
         f.write(content)
 
 
+def get_lead_merge(config, cwd, file, patch_count=1) -> str:
+    dir_lead = "../data/lead/"
+    file_lead = dir_lead + file
+    file_lead = pathlib.Path(file_lead)
+    original_path = os.getcwd()
+    config = pathlib.Path(config)
+
+    file_lead.parent.mkdir(exist_ok=True, parents=True)
+    config_cwd = config_name(config, cwd)
+    argument = [f"--config={config_cwd}", f"--force", f"--patch_count={patch_count}",
+                "--silent"]
+
+    if not skip and argument not in ALREADY_RAN:
+        # this is because of a bug: cwd should always be where --config=foo.yaml is -> fix this at some point
+        shutil.copytree(original_path, dir_lead, dirs_exist_ok=True)
+        try:
+            os.chdir(dir_lead)
+            copy_config(config, cwd)
+            src.main.run_merge(argument)
+            os.chdir(original_path)
+        except Exception as e:
+            os.chdir(original_path)
+            raise e
+        ALREADY_RAN.append(argument)
+    data = file_lead.read_text()
+    return data
+
+
 def get_lead(config, cwd, file, patch_count=1, patch_idx=0) -> str:
     dir_lead = "../data/lead/"
     file_lead = dir_lead + file
