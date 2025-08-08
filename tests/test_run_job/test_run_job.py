@@ -136,3 +136,18 @@ def test_naming(job_session_fixture):
                                     patch_idx=0)
     gold = run_job_utility.get_gold(file="run_job-1-5/biomarkers.csv-1-5")
     assert lead == gold
+
+
+def test_patch(job_session_fixture):
+    # Collect commands from run without patches as our gold
+    gold = [run_job_utility.get_lead(file=f"run_job/cell_{i + 1}/cmd.txt",
+                                     config="test_config_run_job.yaml",
+                                     patch_count=1,
+                                     patch_idx=0) for i in range(0, 5)]
+    # Collect commands from run with patches as our lead
+    lead = [run_job_utility.get_lead(file=f"run_job-{i + 1}-5/cell_{i + 1}/cmd.txt",
+                                     config="test_config_run_job.yaml",
+                                     patch_count=5,
+                                     patch_idx=i) for i in range(0, 5)]
+
+    assert gold == lead
