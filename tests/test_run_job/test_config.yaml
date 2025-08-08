@@ -43,7 +43,7 @@ model:
 experiment:
 - name: "cell_#" # '#' is to be replaced with id-number for our directory names
   id: "latin"
-  cwd: "run_job" # base directroy where our results will be storeds
+  cwd: CWD_REPLACE # base directroy where our results will be storeds
   model: "my_matlab_model" # model we are going to use
   parametrization: "latin_hybercube" # parameterization scheme, produces latin hybercube sampling (range [0, 1])
   cells: 5 # How many cells we want to create population of (10 is small, is only used as example)

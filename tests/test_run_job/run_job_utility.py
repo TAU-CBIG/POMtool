@@ -20,15 +20,29 @@ CELLS = "cells"
 ALREADY_RAN = []
 
 
-def get_lead(config, file, patch_count=1, patch_idx=0) -> str:
+def config_name(config: pathlib.Path, path) -> str:
+    return config.stem + "_" + path + config.suffix
+
+
+def copy_config(config: pathlib.Path, path) -> None:
+    content = ""
+    with open(config, 'r') as f:
+        content = f.read()
+    content = content.replace('CWD_REPLACE', path)
+    with open(config_name(config, path), 'w') as f:
+        f.write(content)
+
+
+def get_lead(config, cwd, file, patch_count=1, patch_idx=0) -> str:
     dir_lead = "../data/lead/"
     file_lead = dir_lead + file
     file_lead = pathlib.Path(file_lead)
     original_path = os.getcwd()
+    config = pathlib.Path(config)
 
     file_lead.parent.mkdir(exist_ok=True, parents=True)
-
-    argument = [f"--config={config}", f"--force", f"--patch_count={patch_count}", f"--patch_idx={patch_idx}",
+    config_cwd = config_name(config, cwd)
+    argument = [f"--config={config_cwd}", f"--force", f"--patch_count={patch_count}", f"--patch_idx={patch_idx}",
                 "--silent"]
 
     if not skip and argument not in ALREADY_RAN:
@@ -36,16 +50,28 @@ def get_lead(config, file, patch_count=1, patch_idx=0) -> str:
         shutil.copytree(original_path, dir_lead, dirs_exist_ok=True)
         try:
             os.chdir(dir_lead)
+            copy_config(config, cwd)
             src.main.run_job(argument)
-        except:
-            pass
-        os.chdir(original_path)
+            os.chdir(original_path)
+        except Exception as e:
+            os.chdir(original_path)
+            raise e
         ALREADY_RAN.append(argument)
     data = file_lead.read_text()
     return data
 
 
 gold_files = []
+
+
+def get_gold_list(files):
+    golds = []
+    for f in files:
+        try:
+            golds.append(get_gold(f))
+        except FileNotFoundError as e:
+            pass
+    return golds
 
 
 def get_gold(file) -> str:
@@ -65,41 +91,6 @@ def get_config_content(config, section, key):
         content = yaml.safe_load(f)
     info = content[section][0][key]
     return info
-
-
-def get_subdir_cell_data(config, file, folder_type, patch_count=1,
-                         patch_idx=0):
-    num_of_cells = get_config_content(config=config, section=EXPERIMENT, key=CELLS)
-    subdir_name = get_config_content(config=config, section=EXPERIMENT, key=NAME)[:-1]  # Get the place of number out
-    cwd = get_config_content(config=config, section=EXPERIMENT, key=CWD)
-    subdir_data = {}
-    failed_files = []
-    for cell in range(num_of_cells):
-        cell += 1
-        file_path = f"{cwd}/{subdir_name}{cell}/{file}"
-        if folder_type == LEAD:
-            type_file = get_lead(config=config, file=file_path, patch_count=patch_count, patch_idx=patch_idx)
-        elif folder_type == GOLD:
-            try:
-                type_file = get_gold(file=file_path)
-            except FileNotFoundError as e:
-                failed_files.append(file_path)
-                type_file = None
-        else:
-            raise NotImplementedError(f"Not implemented type: {folder_type}")
-
-        subdir_data[cell] = type_file
-    if failed_files:
-        raise FileNotFoundError(f"{len(failed_files)} gold files failed to load: `{'´, ´'.join(failed_files)}`")
-    return subdir_data
-
-
-def dict_to_text(dictionary):
-    all_text = ""
-    for cmd in dictionary.values():
-        all_text = all_text + " " + cmd
-
-    return all_text
 
 
 def get_params_from_text(text) -> list:
