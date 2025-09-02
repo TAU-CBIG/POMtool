@@ -28,3 +28,7 @@ To create your own config, check examples directory. All examples there are runn
 
 ## Acknowledgements
 Initial production of this tool was partly funded by [SMASH-HCM](https://smash-hcm.eu/), which is funded by the European Union. Views and opinions expressed are however those of the author(s) only and do not necessarily reflect those of the European Union or the European Education and Culture Executive Agency (EACEA). Neither the European Union nor EACEA can be held responsible for them.
+
+## Authors
+Ossi Noita - Original concept and current maintainer
+Olli Ylinen - Major contributions to optimization, biomarkers, and testing
