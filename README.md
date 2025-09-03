@@ -8,7 +8,7 @@ Currently, just clone the repository and run:
 ```
 ./POMTool.py run --config my_config.yaml
 ```
-Use -h to get help-file for the CLI.
+Use -h to get help-file for the CLI. Currently, this is only tested on python 3.11, newer python version might not work.
 
 Every config should describe model. This section describes how model you are interested can be run and how to input parameters to it.
 
