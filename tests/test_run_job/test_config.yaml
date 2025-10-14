@@ -101,6 +101,23 @@ biomarkers:
   unit: "mN/mm2"
 - biomarker: "cellShortPerc"
   unit: "unitless"
+- biomarker: "VmMax"
+  metric: "Max" # also have time somehow here
+  val: "Vm"
+  unit: "mV"
+  range: "5s:10s" # default 0:end, wihtout s we assume index
+- biomarker: "VmMin"
+  metric: "Min"
+  val: "Vm"
+  unit: "mV"
+- biomarker: "VmPeak"
+  metric: "Peak"
+  val: "Vm"
+  unit: "mV"
+- biomarker: "VmMean"
+  metric: "Mean"
+  val: "Vm"
+  unit: "mV"
 
 # Contains list of calibrations that should be run
 calibration:

@@ -111,6 +111,8 @@ def run_job(arg_list):
 
     if args.optimization:
         log.print_info("Start optimization")
+        # Initialize biomarkers so BIOMARKERS are initialized fully
+        bm.Biomarkers(content['biomarkers'], args.patch_idx, args.patch_count)
         optimization.Optimize(content['optimization'], models, seed)
         log.print_info("End optimization")
         return

@@ -43,6 +43,7 @@ def initialize_default_unit_of():
     default_unit_of = {}
     unit_to_scimath = {}
     default_option = {}
+    unit_to_category = {}
 
     for category in units.keys():
         units_category = units[category]
@@ -53,11 +54,12 @@ def initialize_default_unit_of():
                 default_option[category] = unit_name
             default_unit_of[unit_name] = default_unit
             unit_to_scimath[unit_name] = units_category[unit_name]
+            unit_to_category[unit_name] = category
 
-    return default_unit_of, unit_to_scimath, default_option
+    return default_unit_of, unit_to_scimath, unit_to_category, default_option
 
 
-default_unit_of, unit_to_scimath, default_option = initialize_default_unit_of()
+default_unit_of, unit_to_scimath, unit_to_category, default_option = initialize_default_unit_of()
 
 
 def convert_to_default(data, unit): # -> np.ndarray OR float

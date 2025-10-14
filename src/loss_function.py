@@ -63,6 +63,7 @@ class LossFunction:
         for bio in self.targets.keys():
             biomarkers.append(biomarker.BIOMARKERS[bio])
 
+
         names_required = biomarker.Biomarkers.required_data_full(biomarkers)
         names_optional = biomarker.Biomarkers.optional_data_full(biomarkers)
         header = [str(bm) for bm in biomarkers]

@@ -1,8 +1,10 @@
+from os import utime
 from . import log
 from . import experiment as exp
 from . import utility
 import scipy.signal
 import numpy as np
+import re
 # import matplotlib.pyplot as plt # for debugging, should not be in requirements
 
 TIME = 'time'
@@ -158,6 +160,69 @@ class BiomarkerBase:
     def calculate(self, window: Window) -> float:
         raise NotImplementedError()
 
+class CustomBase(BiomarkerBase):
+    def __init__(self, val, ret_type, time_range, name) -> None:
+        self.name = name
+        self.val = val
+        self.ret_type = ret_type
+        self.time_range = time_range
+
+    def __str__(self) -> str:
+        return self.name
+
+    def required_data(self) -> list:
+        return [TIME, self.val]
+
+    def return_type(self) -> str:
+        return self.ret_type
+
+    def range_time(self, window: Window) -> tuple:
+        r = self.time_range.split(':')
+        if len(r) == 2:
+            beg = CustomBase.time_into_idx(window, r[0])
+            end = CustomBase.time_into_idx(window, r[1])
+            return (beg, end + 1)
+        elif len(r) == 1:
+            val = CustomBase.time_into_idx(window, r[0])
+            return (val, val + 1)
+        else:
+            raise ValueError("unable to parse range, too many values")
+
+
+    @staticmethod
+    def time_into_idx(window: Window, time: str) -> np.int64:
+        if time == 'end':
+            return np.int64(len(window.data[TIME]))
+        split = re.findall("(\\d+\\.*\\d*|[a-z]+)", time)
+        if len(split) == 1:
+            return np.int64(split[0]) # If no unit we have index so we should just return that
+        converted = float(utility.convert_to_default(split[0], split[1]))
+        if converted >= window.data[TIME][-1]:
+            return window.data[TIME][-1] # if value is bigger than max, lets return index for max
+        if converted <= window.data[TIME][0]:
+            return window.data[TIME][0] # if value is smaller than min, lets return index for min
+
+        return np.argmax(window.data[TIME] > converted)
+
+class CustomMax(CustomBase):
+    def calculate(self, window: Window) -> float:
+        r = self.range_time(window)
+        return np.max(window.data[self.val][r[0]:r[1]])
+        
+class CustomMin(CustomBase):
+    def calculate(self, window: Window) -> float:
+        r = self.range_time(window)
+        return np.min(window.data[self.val][r[0]:r[1]])
+
+class CustomPeak(CustomBase):
+    def calculate(self, window: Window) -> float:
+        r = self.range_time(window)
+        return np.max(window.data[self.val][r[0]:r[1]]) - np.min(window.data[self.val][r[0]:r[1]])
+
+class CustomMean(CustomBase):
+    def calculate(self, window: Window) -> float:
+        r = self.range_time(window)
+        return np.mean(window.data[self.val][r[0]:r[1]])
 
 class Max_Cai(BiomarkerBase):
     def __str__(self) -> str:
@@ -752,13 +817,29 @@ class Biomarkers:
         self.biomarker_units = {}
         for i in range(1,len(args)):
             bio = args[i]['biomarker']
+            metric = args[i]['metric'] if 'metric' in args[i] else ''
+            if not bio in BIOMARKERS and metric == '':
+                raise ValueError(f'Unrecognized biomarker `{bio}`')
+            if metric:
+                for a in utility.units.keys():
+                    utility.units[a]
+                val = args[i]['val']
+                ret_type = utility.unit_to_category[args[i]['unit']]
+                time_range = args[i]['range'] if 'range' in args[i] else "0:end" 
+                if metric == 'Max':
+                    BIOMARKERS[bio] = CustomMax(val, ret_type, time_range, bio)
+                if metric == 'Min':
+                    BIOMARKERS[bio] = CustomMin(val, ret_type, time_range, bio)
+                if metric == 'Peak':
+                    BIOMARKERS[bio] = CustomPeak(val, ret_type, time_range, bio)
+                if metric == 'Mean':
+                    BIOMARKERS[bio] = CustomMean(val, ret_type, time_range, bio)
+
             if "unit" in args[i]:
                 unit = args[i]['unit']
             else:
                 unit = utility.DEFAULT
 
-            if not bio in BIOMARKERS:
-                raise ValueError(f'Unrecognized biomarker `{bio}`')
             self.biomarkers.append(BIOMARKERS[bio])
             self.biomarker_units[bio] = unit
 
