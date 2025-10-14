@@ -4,6 +4,7 @@ import run_job_utility
 
 def pytest_addoption(parser):
     parser.addoption("--skip-lead", action="store_true", help="A custom option for pytest")
+    parser.addoption("--skip-experiments", action="store_true", help="A custom option for pytest")
     parser.addoption("--make-gold", action="store_true", help="A custom option for pytest")
     parser.addoption("--delete-gold", action="store_true", help="A custom option for pytest")
 
@@ -11,6 +12,7 @@ def pytest_addoption(parser):
 @pytest.fixture(scope='session')
 def job_session_fixture(request):
     run_job_utility.skip = (request.config.getoption("--skip-lead"))
+    run_job_utility.skip_experiments = (request.config.getoption("--skip-experiments"))
     yield
 
     make_gold = (request.config.getoption("--make-gold"))

@@ -10,6 +10,7 @@ import re
 import datetime
 
 skip = False
+skip_experiments = False
 GOLD = "gold"
 LEAD = "lead"
 EXPERIMENT = "experiment"
@@ -71,6 +72,8 @@ def get_lead(config, cwd, file, patch_count=1, patch_idx=0) -> str:
     config_cwd = config_name(config, cwd)
     argument = [f"--config={config_cwd}", f"--force", f"--patch_count={patch_count}", f"--patch_idx={patch_idx}",
                 "--silent"]
+    if skip_experiments:
+        argument.append("--skip-experiment")
 
     if not skip and argument not in ALREADY_RAN:
         # this is because of a bug: cwd should always be where --config=foo.yaml is -> fix this at some point
