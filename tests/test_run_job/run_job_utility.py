@@ -42,8 +42,7 @@ def get_lead_merge(config, cwd, file, patch_count=1) -> str:
 
     file_lead.parent.mkdir(exist_ok=True, parents=True)
     config_cwd = config_name(config, cwd)
-    argument = [f"--config={config_cwd}", f"--force", f"--patch_count={patch_count}",
-                "--silent"]
+    argument = [f"--config={config_cwd}", f"--force", f"--patch_count={patch_count}"]
 
     if not skip and argument not in ALREADY_RAN:
         # this is because of a bug: cwd should always be where --config=foo.yaml is -> fix this at some point
@@ -157,7 +156,7 @@ def make_gold_file(file: str):
         os.remove(file_gold)
     else:
         log_gold(file_gold, function="Add")
-    shutil.copy(file_lead, file_gold)
+    shutil.copy(file_lead.absolute(), file_gold.absolute())
 
 
 def delete_gold_file(file: str):
