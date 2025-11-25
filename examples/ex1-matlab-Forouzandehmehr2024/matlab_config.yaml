@@ -48,7 +48,10 @@ experiment:
   parametrization: "latin_hybercube" # parameterization scheme, produces latin hybercube sampling (range [0, 1])
   cells: 10 # How many cells we want to create population of (10 is small, is only used as example)
   parameter_count: 5 # parameters in model
-  equation: "0.5 + x + np.heaviside(x-0.5, 0.0)*(x-0.5)" # We apply this equation to the parameters, moving those to range 0.5-2.0. We can use numpy functions here, x is the original parameter
+  equation: "0.5 + x + np.heaviside(x-0.5, 0.0)*(x-0.5)" # We apply this equation to the parameters, moving those to range 0.5-2.0. We can use numpy functions here, x is the original parameter. Can be overridden with equation_N.
+  equation_1_min: "0.5" # Functionally same as base equation (different format)
+  equation_1_mid: "1.0" # Optional (if not defined, would be (min+max/2) = 1.25)
+  equation_1_max: "2.0"
   manifest: "simulation_manifest.csv" # name of the manifest. It will contain what parameters were given to the command
 
 # `biomarkers` list biomarkers that should be calculated

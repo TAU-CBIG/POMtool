@@ -5,6 +5,21 @@ import scipy.stats as sstats
 from . import utility
 
 class Experiment:
+    @staticmethod
+    def makeEq(args, name):
+        name_min = name + '_min'
+        name_mid = name + '_mid'
+        name_max = name + '_max'
+        a = args[name_min] if name_min in args else None
+        b = args[name_mid] if name_mid in args else None
+        c = args[name_max] if name_max in args else None
+        if a and b and c:
+            return f'np.heaviside(0.5-x,0)*(2*({b}-{a})*x+{a}) + (1 - np.heaviside(0.5-x,0))*(2*({c}-{b})*(x-0.5)+{b})'
+        elif a and c:
+            return f'2*({c}-{a})*x + {a}'
+        else:
+            return args[name] if name in args else None
+
     def __init__(self, args, patch_idx: int, patch_count: int, seed: int) -> None:
         self.name = args['name']
         self.id = args['id']
@@ -14,7 +29,12 @@ class Experiment:
         self.cells = args['cells']
         self.parameter_count = args['parameter_count']
         self.manifest_file_name = utility.append_patch(args['manifest'], patch_idx, patch_count)
-        self.equation = args['equation'] if 'equation' in args else ""
+        base_equation = Experiment.makeEq(args, 'equation')
+        self.equations = []
+        for i in range(self.parameter_count):
+            eq = Experiment.makeEq(args, 'equation_' + str(i + 1))
+            self.equations.append(eq if eq else base_equation)
+
         self.seed = seed
         if patch_idx < 0:
             raise ValueError(f"Patch index cannot be less than zero (was `{patch_idx}`)")
@@ -44,13 +64,17 @@ class Experiment:
         return f'{self.cwd}/{self.get_id(idx)}'
 
     def _generate_parameters(self) -> np.ndarray:
-        x = np.ndarray([])
+        arr = np.ndarray([])
         if self.parametrization == 'latin_hybercube':
             sampler = sstats.qmc.LatinHypercube(d=self.parameter_count, seed=self.seed)
-            x = sampler.random(n=self.cells)
+            arr = sampler.random(n=self.cells)
         else:
             raise ValueError(f'parametrization method "{self.parametrization}" not recognized')
-        return x if not self.equation else eval(f'{self.equation}')
+        for i in range(np.size(arr, 1)):
+            if self.equations[i]:
+                x = arr[:, i]
+                arr[:, i] = eval(self.equations[i])
+        return arr
 
     def _generate_manifest(self, parameters: np.ndarray) -> str:
         manifest = ''
