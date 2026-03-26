@@ -6,6 +6,14 @@ from . import utility
 
 class Experiment:
     @staticmethod
+    def names_from_manifest(filename):
+        l = []
+        with open(filename) as f:
+            content = f.read()
+            vals = [line.strip().split(',')[0] for line in content.split(';')]
+            return vals[0:-1]
+
+    @staticmethod
     def makeEq(args, name):
         name_min = name + '_min'
         name_mid = name + '_mid'
@@ -16,7 +24,7 @@ class Experiment:
         if a and b and c:
             return f'np.heaviside(0.5-x,0)*(2*({b}-{a})*x+{a}) + (1 - np.heaviside(0.5-x,0))*(2*({c}-{b})*(x-0.5)+{b})'
         elif a and c:
-            return f'2*({c}-{a})*x + {a}'
+            return f'({c}-{a})*x + {a}'
         else:
             return args[name] if name in args else None
 
@@ -26,13 +34,21 @@ class Experiment:
         self.model_id = args['model']
         self.cwd = utility.append_patch(args['cwd'], patch_idx, patch_count)
         self.parametrization = args['parametrization']
-        self.cells = args['cells']
         self.parameter_count = args['parameter_count']
+        if self.parametrization == 'latin_hybercube':
+            self.cells = args['cells']
+        if self.parametrization == 'sensitivity':
+            self.sweep_size = args['sweep_size']
+            self.cells = self.sweep_size * self.parameter_count
+        self.parameter_names = [None] * self.parameter_count
+        for i in range(self.parameter_count):
+            par_name_i = f'par_{i+1}_name'
+            self.parameter_names[i] = args[par_name_i] if par_name_i in args else str(i)
         self.manifest_file_name = utility.append_patch(args['manifest'], patch_idx, patch_count)
         base_equation = Experiment.makeEq(args, 'equation')
         self.equations = []
         for i in range(self.parameter_count):
-            eq = Experiment.makeEq(args, 'equation_' + str(i + 1))
+            eq = Experiment.makeEq(args, f'par_{i+1}_equation')
             self.equations.append(eq if eq else base_equation)
 
         self.seed = seed
@@ -56,9 +72,31 @@ class Experiment:
     def __str__(self) -> str:
         return self.id
 
-    def get_id(self, idx) -> str:
+    def _get_id_enumerate(self, idx) -> str:
         str_length = len(str(self.cells))
         return self.name.replace("#", str(idx+1).rjust(str_length, "0"))
+
+    def _generate_id_sensitivity(self, idx, parameters) -> str:
+        return self.name \
+            .replace("#", self.id_num_fun(parameters[idx, idx // self.sweep_size])) \
+            .replace("%", self.parameter_names[idx // self.sweep_size])
+
+    def init_get_id_sensitivity(self, parameters):
+        uniq = np.unique(parameters)
+        self.id_left_min_size = max(len(str(int(uniq[-1]))), len(str(int(uniq[0]))))
+        for self.id_right_min_size in range(0, 128):
+            s = np.char.mod(f'%.{self.id_right_min_size}f', uniq)
+            same = s[1:] != s[0:-1]
+            if same.all():
+                break
+
+        if (uniq[0] < 0.0).all():
+            self.id_num_fun = lambda val : f'{"neg" if val < 0 else "pos"}_' + f'{{:.{self.id_right_min_size}f}}'.format(abs(val)).rjust(self.id_left_min_size + 1 + self.id_right_min_size, "0")
+        else:
+            self.id_num_fun = lambda val : f'{{:.{self.id_right_min_size}f}}'.format(val).rjust(self.id_left_min_size + 1 + self.id_right_min_size, "0")
+
+    def get_id(self, idx) -> str:
+        return f'{self.run_names[idx - self.patch.start]}'
 
     def get_directory(self, idx) -> str:
         return f'{self.cwd}/{self.get_id(idx)}'
@@ -68,6 +106,12 @@ class Experiment:
         if self.parametrization == 'latin_hybercube':
             sampler = sstats.qmc.LatinHypercube(d=self.parameter_count, seed=self.seed)
             arr = sampler.random(n=self.cells)
+        elif self.parametrization == 'sensitivity':
+            arr = np.ones((self.cells, self.parameter_count))/2.0
+            sweep = np.arange(0, self.sweep_size, dtype=np.float64)/(self.sweep_size - 1)
+            for i in range(self.parameter_count):
+                start = i * self.sweep_size
+                arr[start:(start+self.sweep_size), i] = sweep
         else:
             raise ValueError(f'parametrization method "{self.parametrization}" not recognized')
         for i in range(np.size(arr, 1)):
@@ -77,15 +121,23 @@ class Experiment:
         return arr
 
     def _generate_manifest(self, parameters: np.ndarray) -> str:
+        if self.parametrization == 'latin_hybercube':
+            get_id = lambda i : self._get_id_enumerate(i)
+        elif self.parametrization == 'sensitivity':
+            get_id = lambda i : self._generate_id_sensitivity(i, parameters)
+            self.init_get_id_sensitivity(parameters)
+
         manifest = ''
+        run_names = []
         # run for each parameter
         for idx in self.patch:
-            directory = self.get_id(idx)
+            directory = get_id(idx)
+            run_names.append(directory)
             manifest_line = [directory]
             for par in parameters[idx,:]:
                 manifest_line.append(str(par))
             manifest += (', '.join(manifest_line)) + ";\n"
-        return manifest
+        return manifest, run_names
 
     def empty_run(self, models: model.Models) -> None:
         def nop(arg1, arg2, arg3):
@@ -109,11 +161,12 @@ class Experiment:
         self.model: model.Model = models.model(self.model_id)
         # generate all parameters
         parameters = self._generate_parameters()
-        manifest = self._generate_manifest(parameters)
+        manifest, self.run_names = self._generate_manifest(parameters)
 
         for idx in self.patch:
             full_path = self.get_directory(idx)
             method(self.model, full_path, parameters[idx,:])
+
         return manifest
 
     def get_data(self, required_names: list, optional_names: list, idx: int) -> dict:

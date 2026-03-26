@@ -4,3 +4,4 @@ pyrightconfig.json
 *.patch
 tests/data/gold/logs.txt
 tests/data/lead
+.python-version

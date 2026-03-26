@@ -130,12 +130,12 @@ def test_unique_params(job_session_fixture):
 
 
 def test_naming(job_session_fixture):
-    lead = run_job_utility.get_lead(file="run_job_patch-1-5/biomarkers.csv-1-5",
+    lead = run_job_utility.get_lead(file="run_job_patch-1-2/biomarkers.csv-1-2",
                                     config="test_config.yaml",
                                     cwd="run_job_patch",
-                                    patch_count=5,
+                                    patch_count=2,
                                     patch_idx=0)
-    gold = run_job_utility.get_gold(file="run_job_patch-1-5/biomarkers.csv-1-5")
+    gold = run_job_utility.get_gold(file="run_job_patch-1-2/biomarkers.csv-1-2")
     assert lead == gold
 
 
@@ -147,11 +147,11 @@ def test_patch(job_session_fixture):
                                      patch_count=1,
                                      patch_idx=0) for i in range(0, 5)]
     # Collect commands from run with patches as our lead
-    lead = [run_job_utility.get_lead(file=f"run_job_patch-{i + 1}-5/cell_{i + 1}/cmd.txt",
+    lead = [run_job_utility.get_lead(file=f"run_job_patch-{i // 3 + 1}-2/cell_{i + 1}/cmd.txt",
                                      config="test_config.yaml",
                                      cwd="run_job_patch",
-                                     patch_count=5,
-                                     patch_idx=i) for i in range(0, 5)]
+                                     patch_count=2,
+                                     patch_idx=i // 3) for i in range(0, 5)]
 
     assert gold == lead
 
@@ -163,14 +163,14 @@ def test_merge(job_session_fixture):
                                     patch_count=1,
                                     patch_idx=0)
 
-    ensure = [run_job_utility.get_lead(file=f"run_job_patch-{i + 1}-5/simulation_manifest.csv-{i + 1}-5",
+    ensure = [run_job_utility.get_lead(file=f"run_job_patch-{i // 3 + 1}-2/simulation_manifest.csv-{i // 3 + 1}-2",
                                        config="test_config.yaml",
                                        cwd="run_job_patch",
-                                       patch_count=5,
-                                       patch_idx=i) for i in range(0, 5)]
+                                       patch_count=2,
+                                       patch_idx=i // 3) for i in range(0, 5)]
 
     lead = run_job_utility.get_lead_merge(file="run_job/simulation_manifest.csv",
                                           config="test_config.yaml",
                                           cwd="run_job_patch",
-                                          patch_count=5)
+                                          patch_count=2)
     assert gold == lead

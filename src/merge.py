@@ -21,9 +21,11 @@ class Merge:
         manifest_base_file = experiment_base.cwd + '/' + experiment_base.manifest_file_name
         for i in range(self.actual_patches):
             experiment = exp.Experiment(self.content['experiment'][0], i, self.patches, 0)
-            manifest_files.append(experiment.cwd + '/' + experiment.manifest_file_name)
-            for j in experiment.patch:
-                copy_instructions.append([experiment.get_directory(j), experiment_base.get_directory(j)])
+            manifest = experiment.cwd + '/' + experiment.manifest_file_name
+            manifest_files.append(manifest)
+            names = exp.Experiment.names_from_manifest(manifest)
+            for name in names:
+                copy_instructions.append([experiment.cwd + '/' + name, experiment_base.cwd + '/' + name])
         if self.dry:
             for ci in copy_instructions:
                 log.print_info(f'Copy `{ci[0]}` into `{ci[1]}`')
