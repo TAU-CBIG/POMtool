@@ -41,9 +41,12 @@ class Experiment:
             self.sweep_size = args['sweep_size']
             self.cells = self.sweep_size * self.parameter_count
         self.parameter_names = [None] * self.parameter_count
+        self.parameter_defaults = [None] * self.parameter_count
         for i in range(self.parameter_count):
             par_name_i = f'par_{i+1}_name'
+            par_dflt_i = f'par_{i+1}_default'
             self.parameter_names[i] = args[par_name_i] if par_name_i in args else str(i)
+            self.parameter_defaults[i] = args[par_dflt_i] if par_dflt_i in args else None
         self.manifest_file_name = utility.append_patch(args['manifest'], patch_idx, patch_count)
         base_equation = Experiment.makeEq(args, 'equation')
         self.equations = []
@@ -106,18 +109,24 @@ class Experiment:
         if self.parametrization == 'latin_hybercube':
             sampler = sstats.qmc.LatinHypercube(d=self.parameter_count, seed=self.seed)
             arr = sampler.random(n=self.cells)
+            for i in range(np.size(arr, 1)):
+                if self.equations[i]:
+                    x = arr[:, i]
+                    arr[:, i] = eval(self.equations[i])
         elif self.parametrization == 'sensitivity':
             arr = np.ones((self.cells, self.parameter_count))/2.0
             sweep = np.arange(0, self.sweep_size, dtype=np.float64)/(self.sweep_size - 1)
             for i in range(self.parameter_count):
                 start = i * self.sweep_size
                 arr[start:(start+self.sweep_size), i] = sweep
+                if self.equations[i]:
+                    x = arr[:, i]
+                    arr[:, i] = eval(self.equations[i])
+                if self.parameter_defaults[i]:
+                    arr[0:start, i] = self.parameter_defaults[i]
+                    arr[(start+self.sweep_size):, i] = self.parameter_defaults[i]
         else:
             raise ValueError(f'parametrization method "{self.parametrization}" not recognized')
-        for i in range(np.size(arr, 1)):
-            if self.equations[i]:
-                x = arr[:, i]
-                arr[:, i] = eval(self.equations[i])
         return arr
 
     def _generate_manifest(self, parameters: np.ndarray) -> str:

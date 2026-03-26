@@ -56,7 +56,7 @@ experiment:
   par_2_equation_min: "0.6"
   par_2_equation_mid: "1.0"
   par_2_equation_max: "2.0"
-  par_2_default: "10.0"
+  par_2_default: "1.1"
   par_3_name: "g_CaL"
   par_3_equation_min: "0.23"
   par_3_equation_max: "200.0"
