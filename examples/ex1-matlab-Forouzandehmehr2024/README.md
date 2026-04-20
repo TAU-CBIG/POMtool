@@ -2,7 +2,7 @@
 This is an example on how to run Matlab cardiomyocyte model Forouzandehmehr2024.
 
 # Prerequsites
-- POMtool (python + other requirements).
+- POMtool (python + other requirements) is in your PATH.
 - Submodule should be loaded, i.e. you should now have directory `Forouzandehmehr2024-hiPSC-CMs-Model-hiMCES` (hint: git submodule init --recurse)
 - MATLAB (by MathWorks)
 - optional: `matlab`-command in your path (you should be able to run `matlab -h`, without errors)
@@ -14,22 +14,25 @@ Our goal is to run function `run_hiMCES` with different arguments, so we should 
 If you manage to run this, you should be able to get the elapsed time printed to your stdout. That means things are working.
 
 # Population of models
+Test that you have POMtool correctly in your path (make sure you have PATH environment variable correctly set):
+`POMtool.py --help`
+
 You can run example config with following:
-`../../POMtool.py --config matlab_config.yaml`
+`POMtool.py --config matlab_config.yaml`
 
 The result is generated into directory `_example_matlab_results`.
 
 You can also run in patches. In this example, we just do the heaviest part in patches, running the model (ie. experiment)
-`../../POMtool.py --config matlab_config.yaml --patch_count=3 --only-experiment --patch_idx=0`
-`../../POMtool.py --config matlab_config.yaml --patch_count=3 --only-experiment --patch_idx=1`
-`../../POMtool.py --config matlab_config.yaml --patch_count=3 --only-experiment --patch_idx=2`
+`POMtool.py --config matlab_config.yaml --patch_count=3 --only-experiment --patch_idx=0`
+`POMtool.py --config matlab_config.yaml --patch_count=3 --only-experiment --patch_idx=1`
+`POMtool.py --config matlab_config.yaml --patch_count=3 --only-experiment --patch_idx=2`
 
 These patches can be then merged with:
-`../../POMtool.py merge --config matlab_config.yaml --only-experiment --patch_count=3`
+`POMtool.py merge --config matlab_config.yaml --only-experiment --patch_count=3`
 
 Then we continue our running without patches:
-`../../POMtool.py --config matlab_config.yaml --skip-experiment --patch_count=3`
+`POMtool.py --config matlab_config.yaml --skip-experiment --patch_count=3`
 
 # Optimization
 We can also optimize parameters instead of creating and calibrating model. 
-`../../POMtool.py --config matlab_config.yaml --optimization`
+`POMtool.py --config matlab_config.yaml --optimization`
