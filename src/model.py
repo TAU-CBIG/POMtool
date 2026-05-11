@@ -68,14 +68,17 @@ class Model:
         cmd_file_name = f'{current_wd}/cmd.txt'
         stdout_file_name = f'{current_wd}/stdout.txt'
         stderr_file_name = f'{current_wd}/stderr.txt'
+        log.print_verbose(f'Running `{current_wd}`')
 
         # check if the command exists and skip if found
         if pathlib.Path(cmd_file_name).exists():
+            log.print_verbose(f'  File {cmd_file_name} already exists')
             with open(cmd_file_name, 'r') as f:
                 file_full_cmd = f.read().strip()
                 if file_full_cmd == full_cmd:
-                    log.print_verbose(f'File {cmd_file_name} already exists, skipping')
+                    log.print_verbose(f'  Skipping')
                     return
+            log.print_verbose(f'  But it has changed, running the command')
 
         shutil.rmtree(current_wd, ignore_errors=True)
         if self.base_directory != None:
@@ -89,6 +92,7 @@ class Model:
         cmd_file.write('\n')
 
         subprocess.run(full_cmd, shell=True, cwd=current_wd, stdout=stdout_file, stderr=stderr_file)
+        log.print_verbose(f'  Finished')
 
     def delete_data(self, current_wd) -> None:
         for name in self.vals.keys():
