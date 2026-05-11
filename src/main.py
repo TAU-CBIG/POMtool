@@ -78,6 +78,7 @@ def run_job(arg_list):
     parser.add_argument('--only-biomarkers', action='store_true',help='Only run biomarkers, you need to have experiment already run and in correct format')
     parser.add_argument('--skip-calibration', action='store_true',help='Skip calibration')
     parser.add_argument('--only-calibration', action='store_true',help='Only run calibration, assumes you have run previous steps already and have the data')
+    parser.add_argument('--run-missing', action='store_true', help='Run even if directory exist but skip existing experiments.')
     parser.add_argument('--force', action='store_true', help='Override existing files during the experiment')
     parser.add_argument('--optimization', action='store_true', help='Run only the optimization. Updates given model parameters to achieve target biomarkers')
     parser.add_argument('--seed', help=f'Select seed to be used in random number generation. Positive integer for seed, "random" for random seed. (default={default_seed})', default=default_seed, metavar="SEED", type=str)
@@ -127,6 +128,8 @@ def run_job(arg_list):
                 if args.force:
                     log.print_verbose("REMOVE:", experiment.cwd)
                     shutil.rmtree(experiment.cwd)
+                elif args.run_missing:
+                    log.print_verbose("UPDATE:", experiment.cwd)
                 else:
                     raise FileExistsError(f'Target directory exists `{experiment.cwd}`')
 
