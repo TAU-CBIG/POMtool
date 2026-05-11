@@ -64,18 +64,31 @@ class Model:
 
     def run(self, current_wd, parameters) -> None:
         command = self._create_command(parameters)
+        full_cmd = ' '.join(command)
+        cmd_file_name = f'{current_wd}/cmd.txt'
+        stdout_file_name = f'{current_wd}/stdout.txt'
+        stderr_file_name = f'{current_wd}/stderr.txt'
+
+        # check if the command exists and skip if found
+        if pathlib.Path(cmd_file_name).exists():
+            with open(cmd_file_name, 'r') as f:
+                file_full_cmd = f.read().strip()
+                if file_full_cmd == full_cmd:
+                    log.print_verbose(f'File {cmd_file_name} already exists, skipping')
+                    return
+
         shutil.rmtree(current_wd, ignore_errors=True)
         if self.base_directory != None:
             shutil.copytree(self.base_directory, current_wd)
         else:
             os.makedirs(current_wd, exist_ok=True)
-        cmd_file = open(f'{current_wd}/cmd.txt', 'w')
-        stdout_file = open(f'{current_wd}/stdout.txt', 'w')
-        stderr_file = open(f'{current_wd}/stderr.txt', 'w')
-        cmd_file.write(' '.join(command))
+        cmd_file = open(cmd_file_name, 'w')
+        stdout_file = open(stdout_file_name, 'w')
+        stderr_file = open(stderr_file_name, 'w')
+        cmd_file.write(full_cmd)
         cmd_file.write('\n')
 
-        subprocess.run(' '.join(command), shell=True, cwd=current_wd, stdout=stdout_file, stderr=stderr_file)
+        subprocess.run(full_cmd, shell=True, cwd=current_wd, stdout=stdout_file, stderr=stderr_file)
 
     def delete_data(self, current_wd) -> None:
         for name in self.vals.keys():
