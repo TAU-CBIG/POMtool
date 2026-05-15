@@ -33,11 +33,6 @@ model:
   file: "res.mat"
   id: "val"
   col: 4
-- val: "Istim" # Similar to Vm, except we do not need unit, as only steps are detected to determine beat, if steps present.
-  method: "matlab"
-  file: "res.mat"
-  id: "val"
-  col: 
 
 # `experiment` describes how model should be run and with what parameters
 experiment:
