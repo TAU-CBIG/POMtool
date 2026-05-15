@@ -3,6 +3,7 @@ from . import model
 import numpy as np
 import scipy.stats as sstats
 from . import utility
+import pathlib
 
 class Experiment:
     @staticmethod
@@ -29,17 +30,51 @@ class Experiment:
             return args[name] if name in args else None
 
     def __init__(self, args, patch_idx: int, patch_count: int, seed: int) -> None:
-        self.name = args['name']
         self.id = args['id']
         self.model_id = args['model']
         self.cwd = utility.append_patch(args['cwd'], patch_idx, patch_count)
         self.parametrization = args['parametrization']
-        self.parameter_count = args['parameter_count']
         if self.parametrization == 'latin_hybercube':
             self.cells = args['cells']
+            self.name = args['name']
+            self.parameter_count = args['parameter_count']
         if self.parametrization == 'sensitivity':
             self.sweep_size = args['sweep_size']
+            self.parameter_count = args['parameter_count']
             self.cells = self.sweep_size * self.parameter_count
+            self.name = args['name']
+        if self.parametrization == 'file':
+            if 'name' in args:
+                raise ValueError('`name` is not used for `file`-parameterization, names come from file')
+            self.parameter_file = args['file']
+            self.parameter_selection = args['selection'] if 'selection' in args else ''
+
+            accepted_parameters = lambda x : True
+
+            if self.parameter_selection != '':
+                if not pathlib.Path(self.parameter_selection).exists():
+                    raise ValueError(f'File {self.parameter_file} missing')
+                with open(self.parameter_selection, 'r') as f:
+                    valid_parameters = set(f.read().replace('\n', ';').replace('\r', '').split(';'))
+                    accepted_parameters = lambda x : x in valid_parameters
+
+            if not pathlib.Path(self.parameter_file).exists():
+                raise ValueError(f'File {self.parameter_file} missing')
+            with open(self.parameter_file, 'r') as f:
+                parameters = list(filter(None, f.read().replace('\n', ';').replace('\r', '').split(';')))
+                self.full_parameter_names = []
+                self.final_parameters = []
+                for par in parameters:
+                    par_vals = par.split(',')
+                    name = par_vals[0]
+                    if not accepted_parameters(name):
+                        continue
+                    self.full_parameter_names.append(name)
+                    self.final_parameters.append(par_vals[1:])
+                self.cells = len(self.full_parameter_names)
+                self.parameter_count = len(self.final_parameters[0])
+
+
         self.parameter_names = [None] * self.parameter_count
         self.parameter_defaults = [None] * self.parameter_count
         for i in range(self.parameter_count):
@@ -125,8 +160,12 @@ class Experiment:
                 if self.parameter_defaults[i]:
                     arr[0:start, i] = self.parameter_defaults[i]
                     arr[(start+self.sweep_size):, i] = self.parameter_defaults[i]
+        elif self.parametrization == 'file':
+            arr = np.zeros((self.cells, self.parameter_count))
+            for i in range(self.cells):
+                arr[i, :] = [float(x) for x in self.final_parameters[i]]
         else:
-            raise ValueError(f'parametrization method "{self.parametrization}" not recognized')
+            raise ValueError(f'Parametrization method "{self.parametrization}" not recognized')
         return arr
 
     def _generate_manifest(self, parameters: np.ndarray) -> str:
@@ -135,6 +174,10 @@ class Experiment:
         elif self.parametrization == 'sensitivity':
             get_id = lambda i : self._generate_id_sensitivity(i, parameters)
             self.init_get_id_sensitivity(parameters)
+        elif self.parametrization == 'file':
+            get_id = lambda i : self.full_parameter_names[i]
+        else:
+            raise ValueError(f'Parametrization method "{self.parametrization}" not recognized')
 
         manifest = ''
         run_names = []

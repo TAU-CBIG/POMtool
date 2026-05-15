@@ -1,0 +1,1 @@
+matlab -batch "tic;addpath('../../../../../examples/ex1-matlab-Forouzandehmehr2024/Forouzandehmehr2024-hiPSC-CMs-Model-hiMCES'); [val, time] = run_hiMCES(result = 'Vm, Cai, AT, Lsarc', simTime=11, stimFlag=1, override_file='Yss.mat', tau_m_factor=3.51, g_f_factor=0.52, g_CaL_factor=2.03, g_to_factor=0.54, g_PCa_factor=3.55); save('res.mat');toc;"
