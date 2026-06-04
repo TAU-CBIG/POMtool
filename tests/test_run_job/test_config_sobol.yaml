@@ -1,0 +1,92 @@
+# `model` describes how model should be run
+model:
+- id: "my_matlab_model" # id
+  exec: "matlab" # Executable used to run out model
+  param_key: "%#%" # Key used to define our paramters
+- par: -batch "tic;addpath('../../../../../examples/ex1-matlab-Forouzandehmehr2024/Forouzandehmehr2024-hiPSC-CMs-Model-hiMCES'); [val, time] = run_hiMCES(result = 'Vm, Cai, AT, Lsarc, Istim', simTime=15, stimFlag=1, override_file='Yss.mat', tau_m_factor=%1%, g_f_factor=%2%, g_CaL_factor=%3%, g_to_factor=%4%, g_PCa_factor=%5%); save('res.mat');toc;" # Our matlab code to do single run of our model, %#% is replaced with parameter.
+- val: "time" # Name for value. This is internal name, mandatory.
+  unit: "s" # Unit used
+  method: "matlab" # Method we are using to load the value. We used matlab `save` to store our values-> matlab
+  file: "res.mat" # Filename
+  id: "time" # Id ([val, time] so this is what we had in time)
+- val: "Vm" # Name for value. This is internal name, required for biomarkers using it.
+  unit: "V" # Unit used
+  method: "matlab" # We saved with matlab `save`, so we use method matlab
+  file: "res.mat" # Filename
+  id: "val" # Id ([val, time] so this is what we had in val)
+  col: 1 # Column data is stored. For 1d-array this is not needed, but for 2D , we need to specify what data we are intersted of. use `row` instead, if your data is stored in rows
+- val: "Cai" # Similar to Vm
+  unit: "mmol"
+  method: "matlab"
+  file: "res.mat"
+  id: "val"
+  col: 2
+- val: "Force" # Similar to Vm
+  unit: "mN/mm2"
+  method: "matlab"
+  file: "res.mat"
+  id: "val"
+  col: 3
+- val: "Lsarc" # Similar to Vm
+  unit: "mol"
+  method: "matlab"
+  file: "res.mat"
+  id: "val"
+  # col: 4
+- val: "Istim" # Similar to Vm, except we do not need unit, as only steps are detected to determine beat, if steps present.
+  method: "matlab"
+  file: "res.mat"
+  id: "val"
+  col: 5
+
+# `experiment` describes how model should be run and with what parameters
+experiment:
+- name: "%_#" # '#' is to be replaced with parameter idx [1, base_sample_size] and '%' with parameter name information (A, A_B_tau_m for example)
+  id: "latin"
+  cwd: CWD_REPLACE # base directroy where our results will be storeds
+  model: "my_matlab_model" # model we are going to use
+  parametrization: "sobol" # parameterization scheme, produces latin hybercube sampling (range [0, 1])
+  parameter_count: 5 # parameters in model
+  base_sample_size: 4 # How long each sobol array is (recommended powers of 2)
+  reduced: False # if default/False: total runs = base_sample_size*(2*parameter_count + 2) |
+                 #             True: total runs = base_sample_size*(  parameter_count + 2)
+  manifest: "simulation_manifest.csv" # name of the manifest. It will contain what parameters were given to the command
+  par_1_name: "tau_m"
+  par_1_equation_min: "0.51212"
+  par_1_equation_max: "1.0"
+  par_2_name: "g_f__"
+  par_2_equation_min: "0.6"
+  par_2_equation_mid: "1.0"
+  par_2_equation_max: "2.0"
+  par_2_default: "1.1"
+  par_3_name: "g_CaL"
+  par_3_equation_min: "0.23"
+  par_3_equation_max: "200.0"
+  par_4_name: "g_to_"
+  par_4_equation_min: "-0.5111"
+  par_4_equation_mid: "10.01"
+  par_4_equation_max: "20.0031"
+  par_5_name: "g_PCa"
+  par_5_equation_min: "0.51211"
+  par_5_equation_mid: "1.0"
+  par_5_equation_max: "2.0"
+
+# `biomarkers` list biomarkers that should be calculated
+biomarkers:
+- target: "mylatin"
+  file: "biomarkers.csv" # Result file where we collect our biomarkers, both inside single directory and as collection in experiment root
+- biomarker: "MDP"
+- biomarker: "APD20"
+  unit: "ms"
+- biomarker: "APD50"
+  unit: "ms"
+- biomarker: "APD90"
+  unit: "ms"
+
+# Contains list of calibrations that should be run
+calibration:
+- file: "biomarkers.csv" # File used for calibration
+- protocol: "range" # calibration condition, check against biomarkers
+  input_data_path: "biomarker_range_sensitivity.csv" # biomarker ranges
+  fail_path: "discarded.csv"
+  success_path: "success.csv" # results passing this protocol are saved here

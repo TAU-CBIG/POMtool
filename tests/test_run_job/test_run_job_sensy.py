@@ -43,3 +43,46 @@ def test_simulation_manifest_sensitivity(job_session_fixture):
     gold = run_job_utility.get_gold(file="run_job_sensitivity/simulation_manifest.csv")
 
     assert gold == lead
+
+def test_biomarkers_sobol(job_session_fixture):
+    lead = run_job_utility.get_lead(file="run_job_sobol/biomarkers.csv",
+                                    config="test_config_sobol.yaml",
+                                    cwd="run_job_sobol",
+                                    patch_count=1,
+                                    patch_idx=0)
+    gold = run_job_utility.get_gold(file="run_job_sobol/biomarkers.csv")
+
+    assert gold == lead
+
+
+def test_discarded_sobol(job_session_fixture):
+    lead = run_job_utility.get_lead(file="run_job_sobol/discarded.csv",
+                                    config="test_config_sobol.yaml",
+                                    cwd="run_job_sobol",
+                                    patch_count=1,
+                                    patch_idx=0)
+    gold = run_job_utility.get_gold(file="run_job_sobol/discarded.csv")
+
+    assert gold == lead
+
+
+def test_success_sobol(job_session_fixture):
+    lead = run_job_utility.get_lead(file="run_job_sobol/success.csv",
+                                    config="test_config_sobol.yaml",
+                                    cwd="run_job_sobol",
+                                    patch_count=1,
+                                    patch_idx=0)
+    gold = run_job_utility.get_gold(file="run_job_sobol/success.csv")
+
+    assert gold == lead
+
+
+def test_simulation_manifest_sobol(job_session_fixture):
+    lead = run_job_utility.get_lead(file="run_job_sobol/simulation_manifest.csv",
+                                    config="test_config_sobol.yaml",
+                                    cwd="run_job_sobol",
+                                    patch_count=1,
+                                    patch_idx=0)
+    gold = run_job_utility.get_gold(file="run_job_sobol/simulation_manifest.csv")
+
+    assert gold == lead

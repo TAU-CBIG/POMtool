@@ -4,6 +4,7 @@ import numpy as np
 import scipy.stats as sstats
 from . import utility
 import pathlib
+import math
 
 class Experiment:
     @staticmethod
@@ -43,6 +44,16 @@ class Experiment:
             self.parameter_count = args['parameter_count']
             self.cells = self.sweep_size * self.parameter_count
             self.name = args['name']
+        if self.parametrization == 'sobol':
+            self.base_sample_size = args['base_sample_size'] # This should be val^2
+            self.parameter_count = args['parameter_count']
+            self.reduced = args['reduced'] if 'reduced' in args else False
+            self.array_count = self.parameter_count + 2 if self.reduced else 2*self.parameter_count + 2
+            self.cells = self.base_sample_size * self.array_count
+            self.sweep_size = self.base_sample_size # For name generation
+            self.name = args['name']
+            self.sobol_array_name = ['A', 'A_B', 'B_A', 'B']
+
         if self.parametrization == 'file':
             if 'name' in args:
                 raise ValueError('`name` is not used for `file`-parameterization, names come from file')
@@ -105,6 +116,15 @@ class Experiment:
 
         # Patch range
         self.patch = range(patch_start, patch_start + patch_length)
+        if self.parametrization == 'sobol':
+            self.sobol_array_name = []
+            self.sobol_array_name.append('A')
+            for i in range(self.parameter_count):
+                self.sobol_array_name.append(f'A_B_{self.parameter_names[i]}')
+            if not self.reduced:
+                for i in range(self.parameter_count):
+                    self.sobol_array_name.append(f'B_A_{self.parameter_names[i]}')
+            self.sobol_array_name.append('B')
 
 
     def __str__(self) -> str:
@@ -113,6 +133,15 @@ class Experiment:
     def _get_id_enumerate(self, idx) -> str:
         str_length = len(str(self.cells))
         return self.name.replace("#", str(idx+1).rjust(str_length, "0"))
+
+    def _generate_id_sobol(self, idx, parameters) -> str:
+        array_set_idx = int(idx / self.base_sample_size)
+        array_name = self.sobol_array_name[array_set_idx] # Change to actual full name list
+
+        relative_idx = idx % self.base_sample_size
+        str_length = len(str(self.base_sample_size))
+        idx_str = str(relative_idx + 1).rjust(str_length, "0")
+        return self.name.replace("#", idx_str).replace("%", array_name)
 
     def _generate_id_sensitivity(self, idx, parameters) -> str:
         return self.name \
@@ -160,6 +189,30 @@ class Experiment:
                 if self.parameter_defaults[i]:
                     arr[0:start, i] = self.parameter_defaults[i]
                     arr[(start+self.sweep_size):, i] = self.parameter_defaults[i]
+        elif self.parametrization == 'sobol':
+            arr = np.zeros((self.cells, self.parameter_count))/2.0
+            p = self.parameter_count
+            s = sstats.qmc.Sobol(d=p, scramble=True, seed=self.seed)
+            N = self.base_sample_size
+            m = math.ceil(math.log2(N))
+            A2 = s.random_base2(m) # A squared size
+            B2 = s.random_base2(m) # B squared size
+            A = A2[0:N, :]
+            B = B2[0:N, :]
+            # Fill arr in order A A_Bi (B_Ai) B
+            idx = 0
+            arr[idx:idx + N, :] = A
+            for i in range(p):
+                idx = idx + N
+                arr[idx:idx + N, :] = A
+                arr[idx:idx + N, i] = B[:, i]
+            if not self.reduced:
+                for i in range(p):
+                    idx = idx + N
+                    arr[idx:idx + N, :] = B
+                    arr[idx:idx + N, i] = A[:, i]
+            idx = idx + N
+            arr[idx:idx + N, :] = B
         elif self.parametrization == 'file':
             arr = np.zeros((self.cells, self.parameter_count))
             for i in range(self.cells):
@@ -174,6 +227,8 @@ class Experiment:
         elif self.parametrization == 'sensitivity':
             get_id = lambda i : self._generate_id_sensitivity(i, parameters)
             self.init_get_id_sensitivity(parameters)
+        elif self.parametrization == 'sobol':
+            get_id = lambda i : self._generate_id_sobol(i, parameters)
         elif self.parametrization == 'file':
             get_id = lambda i : self.full_parameter_names[i]
         else:
