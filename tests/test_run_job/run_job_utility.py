@@ -20,6 +20,9 @@ CELLS = "cells"
 
 ALREADY_RAN = []
 
+def get_proj_root():
+    return pathlib.Path(__file__).parent.resolve()
+
 
 def config_name(config: pathlib.Path, path) -> str:
     return config.stem + "_" + path + config.suffix
@@ -38,7 +41,8 @@ def get_lead_merge(config, cwd, file, patch_count=1) -> str:
     dir_lead = "../data/lead/"
     file_lead = dir_lead + file
     file_lead = pathlib.Path(file_lead)
-    original_path = os.getcwd()
+    original_path = get_proj_root()
+    os.chdir(original_path)
     config = pathlib.Path(config)
 
     file_lead.parent.mkdir(exist_ok=True, parents=True)
@@ -65,7 +69,8 @@ def get_lead(config, cwd, file, patch_count=1, patch_idx=0) -> str:
     dir_lead = "../data/lead/"
     file_lead = dir_lead + file
     file_lead = pathlib.Path(file_lead)
-    original_path = os.getcwd()
+    original_path = get_proj_root()
+    os.chdir(original_path)
     config = pathlib.Path(config)
 
     file_lead.parent.mkdir(exist_ok=True, parents=True)
