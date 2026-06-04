@@ -299,7 +299,7 @@ class MDP(BiomarkerBase):
 
 class CL(BiomarkerBase):
     def __str__(self) -> str:
-        return 'CL'
+        return 'CL' # Cycle length
 
     def required_data(self) -> list:
         return [TIME, VM]
@@ -774,37 +774,44 @@ class relaxTime50(BiomarkerBase):
 
         return RT50
 
-BIOMARKERS = {'MDP': MDP(),
-              'Max_Cai': Max_Cai(),
-              'Min_Cai': Min_Cai(),
-              'Rate_Cai': Rate_Cai(),
-              'CL': CL(),
-              'dv_dt_max': dv_dt_max(),
-              'APA': APA(),
-              'Peak': Peak(),
-              'RT1050': RTNM(10, 50),
-              'RT1090': RTNM(10, 90),
-              'DT9010': DTNM(90,10),
-              'RT10Peak': RTNPeak(10),
-              'CAI_DURATION': CAI_DURATION(),
-              'CTD30': CTDN(30),
-              'CTD50': CTDN(50),
-              'CTD90': CTDN(90),
-              'Rate_AP': Rate_AP(),
-              'RAPP_APD': RAPP_APD(),
-              'peakTension': peakTension(),
-              'cellShortPerc': cellShortPerc(),
-              'APD10': APD_N(10),
-              'APD20': APD_N(20),
-              'APD30': APD_N(30),
-              'APD40': APD_N(40),
-              'APD50': APD_N(50),
-              'APD60': APD_N(60),
-              'APD70': APD_N(70),
-              'APD80': APD_N(80),
-              'APD90': APD_N(90),
-              'relaxTime50': relaxTime50(),
-              "Max_distance_diff": MAX_DISTANCE_DIFF(),
+# Functions to implement
+# Duration, from N% - M%, select which of peaks, eg. First 10% to first 50% (RT), or first 50% to last 50% (APD50)
+# Max/Min inside window
+# Generate new signal (diff)
+# Window, (define signal, lag)
+#   Signal rising edge
+#   Peaks/valleys (potentially threshold, valley threshold)
+BIOMARKERS = {'MDP': MDP(), # Window start value
+              'Max_Cai': Max_Cai(), # Max from window, averages
+              'Min_Cai': Min_Cai(), # Min from window, averages
+              'Rate_Cai': Rate_Cai(), # Window max time value, diff, equation
+              'CL': CL(), # Window start time diff
+              'dv_dt_max': dv_dt_max(), # Diff of signal, max of new signal
+              'APA': APA(), # Peak + equations including other biomarkers
+              'Peak': Peak(), # Peak
+              'RT1050': RTNM(10, 50), # Rise time (Duration special-case)
+              'RT1090': RTNM(10, 90), # Rise time (Duration special-case)
+              'DT9010': DTNM(90,10), # Down time, time between windows (Perhpas we have to make different window)
+              'RT10Peak': RTNPeak(10), # Rise time from N to Peak
+              'CAI_DURATION': CAI_DURATION(),  # MCP-indeksi, eli laske threshold kasvu pisteet, valitse yksi
+              'CTD30': CTDN(30),  # Duration
+              'CTD50': CTDN(50),  # Duration
+              'CTD90': CTDN(90),  # Duration
+              'Rate_AP': Rate_AP(),   # Equation including other biomarkers
+              'RAPP_APD': RAPP_APD(), # Equation including other biomarkers
+              'peakTension': peakTension(), # Peaks (potentially multiple)
+              'cellShortPerc': cellShortPerc(), # Peaks, Peaks, calculations between
+              'APD10': APD_N(10), # Duration
+              'APD20': APD_N(20), # Duration
+              'APD30': APD_N(30), # Duration
+              'APD40': APD_N(40), # Duration
+              'APD50': APD_N(50), # Duration
+              'APD60': APD_N(60), # Duration
+              'APD70': APD_N(70), # Duration
+              'APD80': APD_N(80), # Duration
+              'APD90': APD_N(90), # Duration
+              'relaxTime50': relaxTime50(), # special calculations, but seems to be Duration
+              "Max_distance_diff": MAX_DISTANCE_DIFF(), # Window times, diffs,  (max instead of mean to concanate)
               }
 
 

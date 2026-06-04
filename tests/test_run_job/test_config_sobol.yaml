@@ -3,7 +3,7 @@ model:
 - id: "my_matlab_model" # id
   exec: "matlab" # Executable used to run out model
   param_key: "%#%" # Key used to define our paramters
-- par: -batch "tic;addpath('../../../../../examples/ex1-matlab-Forouzandehmehr2024/Forouzandehmehr2024-hiPSC-CMs-Model-hiMCES'); [val, time] = run_hiMCES(result = 'Vm, Cai, AT, Lsarc, Istim', simTime=15, stimFlag=1, override_file='Yss.mat', tau_m_factor=%1%, g_f_factor=%2%, g_CaL_factor=%3%, g_to_factor=%4%, g_PCa_factor=%5%); save('res.mat');toc;" # Our matlab code to do single run of our model, %#% is replaced with parameter.
+- par: -batch "tic;addpath('../../../../../examples/ex1-matlab-Forouzandehmehr2024/Forouzandehmehr2024-hiPSC-CMs-Model-hiMCES'); [val, time] = run_hiMCES(result = 'Vm, Cai, AT, Lsarc, Istim', simTime=11, stimFlag=1, override_file='Yss.mat', tau_m_factor=%1%, g_f_factor=%2%, g_CaL_factor=%3%, g_to_factor=%4%, g_PCa_factor=%5%); save('res.mat');toc;" # Our matlab code to do single run of our model, %#% is replaced with parameter.
 - val: "time" # Name for value. This is internal name, mandatory.
   unit: "s" # Unit used
   method: "matlab" # Method we are using to load the value. We used matlab `save` to store our values-> matlab
