@@ -590,7 +590,10 @@ class APD_N(BiomarkerBase):
             vec2 = k*vec
             return x1[0] + vec2[0]
 
-        window.make_ap_bot() # Ensure that we have bot idx
+        try: # Hacky fix
+            window.make_ap_bot() # Ensure that we have bot idx
+        except Exception as e:
+            log.print_info("Error generating AP values, trying to continue:", e)
         all_values = np.zeros(window.beat_count)
         i = 0
         beat: Beat
@@ -775,7 +778,10 @@ class relaxTime50(BiomarkerBase):
         return RT50
 
 # Functions to implement
-# Duration, from N% - M%, select which of peaks, eg. First 10% to first 50% (RT), or first 50% to last 50% (APD50)
+# Duration,
+#   define min and max
+#   from N% - M%
+#   select which of peaks, eg. First 10% to first 50% (RT1050), or first 50% to last 50% (APD50)
 # Max/Min inside window
 # Generate new signal (diff)
 # Window, (define signal, lag)
@@ -894,7 +900,8 @@ class Biomarkers:
             for i in range(len(self.biomarkers)):
                 try:
                     value = self.biomarkers[i].calculate(data)
-                except:
+                except Exception as e:
+                    print(e)
                     value = float('nan')
                 unit = self.biomarker_units[str(self.biomarkers[i])]
                 type = self.biomarkers[i].return_type()
