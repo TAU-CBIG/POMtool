@@ -1,0 +1,59 @@
+# Generated file
+model:
+- id: "my_matlab_model" # id
+  exec: "matlab" # Executable used to run out model
+  param_key: "%#%" # Key used to define our paramters
+  par: -batch "addpath('../../../ex1-matlab-Forouzandehmehr2024/Forouzandehmehr2024-hiPSC-CMs-Model-hiMCES'); [Vm,time] = run_hiMCES(result = 'Vm', simTime=500, g_Kr_factor=%1%, gNa_factor=%2%); save('res.mat');"
+- val: "time" # Name for value. This is internal name, mandatory.
+  unit: "s" # Unit used
+  method: "matlab" # Method we are using to load the value. We used matlab `save` to store our values-> matlab
+  file: "res.mat" # Filename
+  id: "time" # Id ([val, time] so this is what we had in time)
+- val: "Vm" # Name for value. This is internal name, required for biomarkers using it.
+  unit: "V" # Unit used
+  method: "matlab" # We saved with matlab `save`, so we use method matlab
+  file: "res.mat" # Filename
+  id: "Vm" # Id ([val, time] so this is what we had in val)
+
+experiment:
+- name: "%_#"
+  id: "mylatin"
+  cwd: "_optim_results" # base directroy where our results will be storeds
+  model: "my_matlab_model" # model we are going to use
+  parameter_count: 2 # parameters in model
+  par_1_name: "g_Kr"
+  par_1_equation_min: "0.5"
+  par_1_equation_max: "1.0"
+  par_2_name: "gNa"
+  par_2_equation_min: "0.75"
+  par_2_equation_max: "1.25"
+
+
+biomarkers:
+- target: "mylatin"
+  file: "biomarkers.csv" # Result file where we collect our biomarkers, both inside single directory and as collection in experiment root
+- biomarker: "APD90"
+  unit: "ms"
+
+calibration:
+- file: "biomarkers.csv" # File used for calibration
+- protocol: "nonan" # calibration condition, basic check, checks if nan or inf
+  fail_path: "discarded_because_of_nans.csv" # If check fails, (ie. there ara nan/inf values)
+  success_path: "success.csv" # results passing this protocol are saved here
+
+# describe how model should optimized
+optimization:
+- model: "my_matlab_model" # model name (not used yet)
+  cwd: "_step2_optimization_results" # base directroy where our results will be storeds
+  dir_name: "./" # directory in cwd, where the each individual run is stored
+  loss_type: "mse" # Loss (fitness/energy) function used. Options: "mse"
+  target_file: "step2_target.csv" # required(mse): target biomarkers to calculate loss
+  parameter_count: 2 # Parameters in model
+  algorithm: "StornPrice" # parameter update algorithm for optimization. Options: "StornPrice", "NelderMead"
+  bounds_file: "step2_bounds.csv" # limits for parameter values. Optionality depends on algorithm.
+  x0: "step2_x0.csv" #required, start point for optimization (recommended to have sane value)
+  max_iter: 7 # optional
+  result_file: "_step2_optimization_results/result.txt" # required. results will be stored to this file
+  workers: 8
+  polish: false
+

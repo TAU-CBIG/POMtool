@@ -1,0 +1,55 @@
+# Generated file
+model:
+- id: "my_matlab_model" # id
+  exec: "matlab" # Executable used to run out model
+  param_key: "%#%" # Key used to define our paramters
+  par: -batch "addpath('../../../ex1-matlab-Forouzandehmehr2024/Forouzandehmehr2024-hiPSC-CMs-Model-hiMCES'); [Vm,time] = run_hiMCES(result = 'Vm', simTime=500, g_Kr_factor=%1%*0.657153286156736, gNa_factor=%2%*1.0012271585432173, kNaCa_factor=%3%); save('res.mat');" 
+- val: "time" # Name for value. This is internal name, mandatory.
+  unit: "s" # Unit used
+  method: "matlab" # Method we are using to load the value. We used matlab `save` to store our values-> matlab
+  file: "res.mat" # Filename
+  id: "time" # Id ([val, time] so this is what we had in time)
+- val: "Vm" # Name for value. This is internal name, required for biomarkers using it.
+  unit: "V" # Unit used
+  method: "matlab" # We saved with matlab `save`, so we use method matlab
+  file: "res.mat" # Filename
+  id: "Vm" # Id ([val, time] so this is what we had in val)
+
+
+experiment:
+- name: "%_#"
+  id: "mylatin"
+  cwd: "_population" # base directroy where our results will be storeds
+  model: "my_matlab_model" # model we are going to use
+  parametrization: "latin_hybercube"
+  cells: 1000
+  parameter_count: 3 # parameters in model
+  par_1_name: "g_Kr"
+  par_1_equation_min: "0.5"
+  par_1_equation_max: "1.5"
+  par_2_name: "gNa"
+  par_2_equation_min: "0.75"
+  par_2_equation_max: "1.25"
+  par_3_name: "kNaCa"
+  par_3_equation_min: "0.75"
+  par_3_equation_max: "1.25"
+  manifest: "simulation_manifest.csv" # name of the manifest. It will contain what para meters were given to the command
+
+biomarkers:
+- target: "mylatin"
+  file: "biomarkers.csv" # Result file where we collect our biomarkers, both inside single directory and as collection in experiment root
+- biomarker: "APD90"
+  unit: "ms"
+
+calibration:
+- file: "biomarkers.csv" # File used for calibration
+- protocol: "nonan" # calibration condition, basic check, checks if nan or inf
+  fail_path: "discarded_because_of_nans.csv" # If check fails, (ie. there ara nan/inf values)
+- protocol: "range" # calibration condition, check against biomarkers
+  input_data_path: "healthy_or_lqt.csv" # biomarker ranges
+  fail_path: "failed.csv"
+- protocol: "range" # calibration condition, check against biomarkers
+  input_data_path: "lqt.csv" # biomarker ranges
+  fail_path: "healthy.csv"
+  success_path: "success.csv" # results passing this protocol are saved here
+

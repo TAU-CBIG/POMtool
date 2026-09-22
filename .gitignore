@@ -9,3 +9,8 @@ tests/data/lead
 dist
 build
 */POMtool.egg-info/*
+*.pdf
+*.svg
+*.png
+*.odg
+examples/*/*.tex
