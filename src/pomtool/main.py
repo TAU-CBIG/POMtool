@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 #import matplotlib.pyplot as plt # temp debug
+from importlib.metadata import version
 from . import merge
 from . import experiment as exp
 from . import model as mod
@@ -14,6 +15,11 @@ import shutil
 import yaml
 import sys
 import random
+
+try:
+    __version__ = version("POMtool")
+except:
+    __version__ = "DEVELOPMENT"
 
 default_seed = 0
 
@@ -166,9 +172,13 @@ def run():
     RUN = 'run'
     MERGE = 'merge'
     parser.add_argument('mode', choices=[RUN, MERGE], help=f"Used mode, either `{RUN}` or `{MERGE}`, or by default use `run`")
+    parser.add_argument('--version', action='store_true', help='Print out version info')
     arg_list = sys.argv[1:]
     if len(sys.argv) < 2:
         parser.print_help()
+        return
+    elif sys.argv[1] == '--version':
+        print(f"POMtool version {__version__}")
         return
     elif sys.argv[1][0] == '-':
         mode = 'run'

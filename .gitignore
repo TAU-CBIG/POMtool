@@ -6,3 +6,6 @@ pyrightconfig.json
 tests/data/gold/logs.txt
 tests/data/lead
 .python-version
+dist
+build
+*/POMtool.egg-info/*
